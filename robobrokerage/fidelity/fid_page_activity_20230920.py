@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import StaleElementReferenceException
 
-from ..crawler_util import *
+from .crawler_util import *
 
 import pandas as pd
 import numpy as np

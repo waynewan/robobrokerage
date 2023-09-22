@@ -6,8 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-from ..crawler_util import *
-# from .fid_common import *
+from .crawler_util import *
 from . import fid_menu_site
 
 import pandas as pd

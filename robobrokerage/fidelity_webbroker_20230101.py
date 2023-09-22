@@ -1,27 +1,3 @@
-from jackutil.browser_mgr import *
-
-from .crawler_util import *
-from .trade_common import *
-
-from .fidelity import fid_menu_accounts
-from .fidelity import fid_menu_site
-from .fidelity import fid_page_auth
-from .fidelity import fid_page_auth_20230916
-from .fidelity import fid_page_landing
-from .fidelity import fid_page_activity_20230920
-from .fidelity import fid_page_order
-from .fidelity import fid_page_summary
-from .fidelity import fid_page_position_v1
-from .fidelity import fid_page_position_v2
-
-from selenium.common.exceptions import NoSuchElementException
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support.ui import WebDriverWait
-
 import pandas as pd
 import argparse
 import datetime
@@ -35,6 +11,19 @@ import time
 import locale
 locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
 
+from jackutil import browser_mgr
+from . import trade_common
+from .fidelity import fid_menu_accounts
+from .fidelity import fid_menu_site
+from .fidelity import fid_page_activity_20230920
+from .fidelity import fid_page_auth
+from .fidelity import fid_page_auth_20230916
+from .fidelity import fid_page_landing
+from .fidelity import fid_page_order
+from .fidelity import fid_page_position_v1
+from .fidelity import fid_page_position_v2
+from .fidelity import fid_page_summary
+
 # --
 # --
 # --
@@ -46,7 +35,7 @@ class fidelity_webbroker:
 			'login':login,
 			'secret':secret
 		}
-		subdir = temporary_dir_name(self.persist_name)
+		subdir = browser_mgr.temporary_dir_name(self.persist_name)
 		self.rootdir = f'{tmpdir}/{subdir}'
 		if(doInit):
 			self.init_broker_session()
@@ -61,12 +50,12 @@ class fidelity_webbroker:
 	def create_browser(self,rootdir=None):
 		if(rootdir is None):
 			rootdir=tempfile.TemporaryDirectory()
-		driver = create_new_browser(rootdir=rootdir,persist_name=self.persist_name)
+		driver = browser_mgr.create_new_browser(rootdir=rootdir,persist_name=self.persist_name)
 		driver.current_url #// test is the remote still reachable
 		return (rootdir,driver)
 
 	def reconnect_session(self):
-		driver = reconnect_browser(persist_name=self.persist_name)
+		driver = browser_mgr.reconnect_browser(persist_name=self.persist_name)
 		driver.current_url #// test is the remote still reachable
 		return driver
 
@@ -194,7 +183,7 @@ class fidelity_webbroker:
 		triggered_limit_price_rule = None
 		current_market = fid_page_order.get_current_market(self.driver)
 		if(price is None or np.isnan(price)):
-			triggered_limit_price_rule,limit_price = compute_limit_price(action=action,qty=quantity,**current_market)
+			triggered_limit_price_rule,limit_price = trade_common.compute_limit_price(action=action,qty=quantity,**current_market)
 			fid_page_order.set_limit_price(self.driver,limit_price)
 		else:
 			fid_page_order.set_limit_price(self.driver,price)
@@ -224,46 +213,4 @@ class fidelity_webbroker:
 		sent_order_result = fid_page_order.get_sent_order(self.driver)
 		preview['Order#'] = sent_order_result['Order#']
 		return preview
-
-# -- rm -- 	# --
-# -- rm -- 	# --
-# -- rm -- 	# --
-# -- rm -- 	def _cancel_order_with_btn(self,cancel_btn):
-# -- rm -- 		cancel_btn.click()
-# -- rm -- 		wait_for_cxl_confirm_popup = EC.presence_of_element_located((
-# -- rm -- 			By.XPATH, 
-# -- rm -- 			XPATH_CANCEL_TRADE_BTN
-# -- rm -- 		))
-# -- rm -- 		cxl_confirm_btn = WebDriverWait(self.driver, 3).until(wait_for_cxl_confirm_popup)
-# -- rm -- 		cxl_confirm_btn.click()
-# -- rm -- 
-# -- rm -- 	def cancel_all_orders(self):
-# -- rm -- 		goto_expanded_orders(self.driver)
-# -- rm -- 		actions_map = create_ordnum_button_map(self.driver)
-# -- rm -- 		for order_num in actions_map.keys():
-# -- rm -- 			self.cancel_order(order_num)
-# -- rm -- 		
-# -- rm -- 	def cancel_order(self,order_num):
-# -- rm -- 		goto_expanded_orders(self.driver)
-# -- rm -- 		actions_map = create_ordnum_button_map(self.driver)
-# -- rm -- 		cancel_btn = actions_map[order_num]['cancelBtn']
-# -- rm -- 		self._cancel_order_with_btn(cancel_btn)
-# -- rm -- 
-# -- rm -- 	#//
-# -- rm -- 	#//
-# -- rm -- 	#//
-# -- rm -- 	def get_positions(self):
-# -- rm -- 		positions = fidelity_get_positions(self.driver)
-# -- rm -- 		return positions
-# -- rm -- 
-# -- rm -- 	#//
-# -- rm -- 	#//
-# -- rm -- 	#//
-# -- rm -- 	def get_orders(self):
-# -- rm -- 		return fidelity_get_orders(self.driver)
-# -- rm -- 
-# -- rm -- 	def get_active_orders(self):
-# -- rm -- 		all_orders = fidelity_get_orders(self.driver)
-# -- rm -- 		live_orders = all_orders[ all_orders['Status']=='Open' ]
-# -- rm -- 		return live_orders
 

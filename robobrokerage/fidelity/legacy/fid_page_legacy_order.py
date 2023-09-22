@@ -7,7 +7,6 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
 from ..crawler_util import *
-# from .fid_common import *
 
 import pandas as pd
 import numpy as np
