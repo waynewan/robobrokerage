@@ -111,6 +111,18 @@ class fidelity_webbroker:
 	# --
 	# --
 	# --
+	def show_order_manage_page(self,subacct=None):
+		fid_page_activity_20230920.goto_page(self.driver)
+		fid_page_activity_20230920.wait_page_loaded(self.driver)
+		fid_page_activity_20230920.select_orders_only(self.driver)
+		fid_page_activity_20230920.wait_page_loaded(self.driver)
+		# --
+		fid_menu_accounts.select_account(self.driver,subacct)
+		fid_menu_accounts.wait_page_loaded(self.driver)
+
+	# --
+	# --
+	# --
 	def get_history(self,*,subacct=None,days_opt='10',include_raw=False,include_details=True):
 		fid_page_activity_20230920.goto_page(self.driver)
 		fid_page_activity_20230920.wait_page_loaded(self.driver)
