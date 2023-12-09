@@ -13,7 +13,8 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
 
 from jackutil import browser_mgr
 from . import trade_common
-from .fidelity import fid_menu_accounts
+# from .fidelity import fid_menu_accounts
+from .fidelity import fid_menu_accounts_20231207 as fid_menu_accounts
 from .fidelity import fid_menu_site
 from .fidelity import fid_page_activity_20230920
 from .fidelity import fid_page_auth
