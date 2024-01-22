@@ -27,7 +27,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
 # --
 URL_PAGE = "https://digital.fidelity.com/ftgw/digital/portfolio/summary"
 # --
-XP_PAGE_ID1 = '//div[@aria-label="Summary"][@aria-current="true"]'
+XP_PAGE_ID1 = '//button[@aria-label="Customize"]'
 XP_LEGACY_PAGE_BTN = '//a[text()="legacy portfolio summary page"]'
 # --
 PAGE_STATUS_UNKNOWN = "__PAGE_STATUS_UNKNOWN__"

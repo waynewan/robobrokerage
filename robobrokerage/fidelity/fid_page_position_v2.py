@@ -28,7 +28,6 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
 # --
 URL_PAGE = "https://digital.fidelity.com/ftgw/digital/portfolio/positions"
 # --
-XP_PAGE_ID1 = '//div[@aria-label="Positions"][@aria-current="true"]'
 XP_OVERVIEW_TAB = '//div[@id="posweb-grid_top"]//*[text()="Overview"]'
 XP_DIVIDEND_VIEW_TAB = '//div[@id="posweb-grid_top"]//*[text()="Dividend View"]'
 XP_REFRESH = '//div[@id="posweb-grid_top"]//button[@aria-label="Refresh Positions"]'
