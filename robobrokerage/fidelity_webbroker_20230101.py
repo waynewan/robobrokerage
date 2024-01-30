@@ -188,6 +188,9 @@ class fidelity_webbroker:
 	# --
 	# --
 	def new_order_by_qty(self,*,account,action,symbol,quantity,price=None,capital_limit=None,auto_send=True):
+		if(quantity<=0):
+			raise Exception(f"bad quantity:{quantity}")
+		# --
 		fid_page_order.goto_page_with_symbol(self.driver,symbol)
 		fid_page_order.raise_if_symbol_not_found(self.driver)
 		account_selected = fid_page_order.select_account(self.driver,account)
