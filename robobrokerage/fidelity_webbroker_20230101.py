@@ -16,7 +16,7 @@ from . import trade_common
 # from .fidelity import fid_menu_accounts
 from .fidelity import fid_menu_accounts_20231207 as fid_menu_accounts
 from .fidelity import fid_menu_site
-from .fidelity import fid_page_activity_20230920
+from .fidelity import fid_page_activity_20240218 as m_activity
 from .fidelity import fid_page_auth
 from .fidelity import fid_page_auth_20230916
 from .fidelity import fid_page_landing
@@ -113,10 +113,10 @@ class fidelity_webbroker:
 	# --
 	# --
 	def show_order_manage_page(self,subacct=None):
-		fid_page_activity_20230920.goto_page(self.driver)
-		fid_page_activity_20230920.wait_page_loaded(self.driver)
-		fid_page_activity_20230920.select_orders_only(self.driver)
-		fid_page_activity_20230920.wait_page_loaded(self.driver)
+		m_activity.goto_page(self.driver)
+		m_activity.wait_page_loaded(self.driver)
+		m_activity.select_orders_only(self.driver)
+		m_activity.wait_page_loaded(self.driver)
 		# --
 		fid_menu_accounts.select_account(self.driver,subacct)
 		fid_menu_accounts.wait_page_loaded(self.driver)
@@ -125,24 +125,24 @@ class fidelity_webbroker:
 	# --
 	# --
 	def get_history(self,*,subacct=None,days_opt='10',include_raw=False,include_details=True):
-		fid_page_activity_20230920.goto_page(self.driver)
-		fid_page_activity_20230920.wait_page_loaded(self.driver)
-		fid_page_activity_20230920.select_history_only(self.driver)
-		fid_page_activity_20230920.wait_page_loaded(self.driver)
+		m_activity.goto_page(self.driver)
+		m_activity.wait_page_loaded(self.driver)
+		m_activity.select_history_only(self.driver)
+		m_activity.wait_page_loaded(self.driver)
 		# --
 		fid_menu_accounts.select_account(self.driver,subacct)
 		fid_menu_accounts.wait_page_loaded(self.driver)
 		# --
 		# !! must be done last; otherwise, get reset by other changes
 		# --
-		fid_page_activity_20230920.select_date_filter(self.driver,days_opt=days_opt)
-		fid_page_activity_20230920.wait_page_loaded(self.driver)
+		m_activity.select_date_filter(self.driver,days_opt=days_opt)
+		m_activity.wait_page_loaded(self.driver)
 		# --
-		fid_page_activity_20230920.view_all_txns(self.driver)
-		fid_page_activity_20230920.wait_page_loaded(self.driver)
+		m_activity.view_all_txns(self.driver)
+		m_activity.wait_page_loaded(self.driver)
 		# --
-		raw_transactions = fid_page_activity_20230920.raw_transactions(self.driver,incl_details=include_details)
-		formatted_transactions = fid_page_activity_20230920.formatted_transactions(raw_transactions)
+		raw_transactions = m_activity.raw_transactions(self.driver,incl_details=include_details)
+		formatted_transactions = m_activity.formatted_transactions(raw_transactions)
 		if(include_raw):
 			return (raw_transactions,formatted_transactions)
 		else:
