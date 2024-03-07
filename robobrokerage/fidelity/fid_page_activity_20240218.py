@@ -29,7 +29,8 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
 # --
 URL_PAGE = "https://digital.fidelity.com/ftgw/digital/portfolio/activity"
 # --
-XP_REFRESH_BTN = '//pvd3-link[@pvd-aria-label="Refresh"]'
+# -- rm on 20240307 -- XP_REFRESH_BTN = '//pvd3-link[@pvd-aria-label="Refresh"]'
+XP_REFRESH_BTN = '//button[@aria-label="Refresh"]'
 XP_DATE_SELECTOR_DD = "//button[@id='timeperiod-select-button']"
 XP_DATE_SELECTOR_OPT = "//div[@id='timeperiod-select-container']//input/.."
 XP_DATE_SELECTOR_APPLY = "//div[@id='timeperiod-select-container']//*[normalize-space(text())='Apply']"
