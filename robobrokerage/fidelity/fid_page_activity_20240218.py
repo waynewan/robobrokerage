@@ -69,7 +69,8 @@ def select_date_filter(driver,days_opt):
 	# --
 	# -- click date filter to show options
 	# --
-	date_filter_dd = driver.find_element(By.XPATH,XP_DATE_SELECTOR_DD)
+	# date_filter_dd = driver.find_element(By.XPATH,XP_DATE_SELECTOR_DD)
+	date_filter_dd = wait_for_clickable_xpath(driver,XP_DATE_SELECTOR_DD,timeout=10)
 	date_filter_dd.click()
 	# --
 	# -- select the option that match the partial text days_opt
