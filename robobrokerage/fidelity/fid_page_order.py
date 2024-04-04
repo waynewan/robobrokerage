@@ -109,78 +109,78 @@ def page_status(driver):
 # --
 XPATH_STR_FORM_BTN = "//order-entry-base//button"
 def fid_new_order_select_option(driver, list_name, option_name):
-    # --
-    # -- find the dropbox, and click it to show the option list
-    # --
-    drop_list = None
-    for ele in driver.find_elements_by_xpath(XPATH_STR_FORM_BTN):
-        lines = ele.text.splitlines()
-        if(len(lines)==0):
-            continue
-        button_name = lines[0]
-        if(list_name.lower() in button_name.lower()):
-            ele.click()
-            break
+	# --
+	# -- find the dropbox, and click it to show the option list
+	# --
+	drop_list = None
+	for ele in driver.find_elements_by_xpath(XPATH_STR_FORM_BTN):
+		lines = ele.text.splitlines()
+		if(len(lines)==0):
+			continue
+		button_name = lines[0]
+		if(list_name.lower() in button_name.lower()):
+			ele.click()
+			break
 	# --
 	# -- drop list loading 
 	# -- !! could take time if connection is slow !!
 	# --
 	for sltime in (0.3, 0.5, 1.0):
-    	time.sleep(sltime)
-    	drop_list = driver.find_elements_by_xpath("//div[@role='option']")
-    	if(len(drop_list)>0):
+		time.sleep(sltime)
+		drop_list = driver.find_elements_by_xpath("//div[@role='option']")
+		if(len(drop_list)>0):
 			break
-        drop_list = driver.find_elements_by_xpath("//li[@role='presentation']")
-    	if(len(drop_list)>0):
+		drop_list = driver.find_elements_by_xpath("//li[@role='presentation']")
+		if(len(drop_list)>0):
 			break
-    if(len(drop_list)==0):
-        raise BaseException("Cannot find dropbox name:" + list_name)
-    # --
-    # -- find the right option
-    # --
-    option_selected_text = None
-    for ele in drop_list:
-        lines = ele.text.splitlines()
-        if(len(lines)!=1):
-            continue
-        button_name = lines[0]
-        if(option_name.lower() in button_name.lower()):
-            option_selected_text = ele.text
-            ele.click()
-            break
-    if(option_selected_text is None):
-        raise BaseException("Cannot find option name:" + option_name)
-    return option_selected_text
+	if(len(drop_list)==0):
+		raise BaseException("Cannot find dropbox name:" + list_name)
+	# --
+	# -- find the right option
+	# --
+	option_selected_text = None
+	for ele in drop_list:
+		lines = ele.text.splitlines()
+		if(len(lines)!=1):
+			continue
+		button_name = lines[0]
+		if(option_name.lower() in button_name.lower()):
+			option_selected_text = ele.text
+			ele.click()
+			break
+	if(option_selected_text is None):
+		raise BaseException("Cannot find option name:" + option_name)
+	return option_selected_text
 
 XPATH_STR_FORM_INP = "//order-entry-base//input/.."
 def fid_new_order_enter_text(driver, box_label, inp_text):
-    req = {"id":[str.startswith,"eqt-"]}
-    inp_box_ele = None
-    for ele in driver.find_elements_by_xpath(XPATH_STR_FORM_INP):
-        if(box_label.lower() in ele.text.lower()):
-            inp_box_ele = ele.find_element_by_xpath("input")
-            if(not match_element(driver, inp_box_ele, req)):
-                continue
-            inp_box_ele.clear()
-            inp_box_ele.send_keys(inp_text)
-            break
-    if(inp_box_ele is None):
-        raise BaseException("Cannot find input with label:" + box_label)
+	req = {"id":[str.startswith,"eqt-"]}
+	inp_box_ele = None
+	for ele in driver.find_elements_by_xpath(XPATH_STR_FORM_INP):
+		if(box_label.lower() in ele.text.lower()):
+			inp_box_ele = ele.find_element_by_xpath("input")
+			if(not match_element(driver, inp_box_ele, req)):
+				continue
+			inp_box_ele.clear()
+			inp_box_ele.send_keys(inp_text)
+			break
+	if(inp_box_ele is None):
+		raise BaseException("Cannot find input with label:" + box_label)
 
 def extract(driver, ele, t1="a", k1=None):
-    if(t1=="a"):
-        return ele.get_attribute(k1)
-    if(t1=="x"):
-        return ele.text
+	if(t1=="a"):
+		return ele.get_attribute(k1)
+	if(t1=="x"):
+		return ele.text
 
 def match_element(driver, ele, attrs=None):
-    if(attrs is None):
-        return True
-    for attr in attrs.items():
-        attr_str = extract(driver, ele, t1="a", k1=attr[0])
-        if( not attr[1][0](attr_str,attr[1][1])):
-            return False
-    return True
+	if(attrs is None):
+		return True
+	for attr in attrs.items():
+		attr_str = extract(driver, ele, t1="a", k1=attr[0])
+		if( not attr[1][0](attr_str,attr[1][1])):
+			return False
+	return True
 
 # --
 # -- actions

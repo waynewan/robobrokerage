@@ -7,16 +7,16 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 
 def find_element_by_xpath_if_exist(driver,xpath):
-    try:
-        return driver.find_element_by_xpath(xpath)
-    except NoSuchElementException:
-        return None
+	try:
+		return driver.find_element_by_xpath(xpath)
+	except NoSuchElementException:
+		return None
 
 def find_elements_by_xpath_if_exist(driver,xpath):
-    try:
-        return driver.find_elements_by_xpath(xpath)
-    except NoSuchElementException:
-        return None
+	try:
+		return driver.find_elements_by_xpath(xpath)
+	except NoSuchElementException:
+		return None
 
 def select_option(select_ele,select_text):
 	for option in select_ele.find_elements_by_tag_name('option'):
