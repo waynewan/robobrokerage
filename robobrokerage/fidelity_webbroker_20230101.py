@@ -128,7 +128,15 @@ class fidelity_webbroker:
 		m_activity.goto_page(self.driver)
 		m_activity.wait_page_loaded(self.driver)
 		m_activity.select_history_only(self.driver)
+		# --
+		# !! possible race condition on page and panel loading !!
+		# !! wait for menu is available before changing it     !!
+		# --
 		m_activity.wait_page_loaded(self.driver)
+		fid_menu_accounts.wait_page_loaded(self.driver)
+		# --
+		# -- assume no more stale elements, and proceed to choose 
+		# -- the target account
 		# --
 		fid_menu_accounts.select_account(self.driver,subacct)
 		fid_menu_accounts.wait_page_loaded(self.driver)

@@ -120,12 +120,20 @@ def fid_new_order_select_option(driver, list_name, option_name):
         button_name = lines[0]
         if(list_name.lower() in button_name.lower()):
             ele.click()
-            time.sleep(0.3)
-            drop_list = driver.find_elements_by_xpath("//div[@role='option']")
-            if(len(drop_list)==0):
-                drop_list = driver.find_elements_by_xpath("//li[@role='presentation']")
             break
-    if(drop_list is None):
+	# --
+	# -- drop list loading 
+	# -- !! could take time if connection is slow !!
+	# --
+	for sltime in (0.3, 0.5, 1.0):
+    	time.sleep(sltime)
+    	drop_list = driver.find_elements_by_xpath("//div[@role='option']")
+    	if(len(drop_list)>0):
+			break
+        drop_list = driver.find_elements_by_xpath("//li[@role='presentation']")
+    	if(len(drop_list)>0):
+			break
+    if(len(drop_list)==0):
         raise BaseException("Cannot find dropbox name:" + list_name)
     # --
     # -- find the right option
