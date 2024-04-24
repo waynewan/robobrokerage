@@ -30,7 +30,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
 URL_PAGE = "https://digital.fidelity.com/ftgw/digital/portfolio/activity"
 # --
 # -- rm on 20240307 -- XP_REFRESH_BTN = '//pvd3-link[@pvd-aria-label="Refresh"]'
-XP_REFRESH_BTN = '//button[@aria-label="Refresh"]'
+# -- rm on 20240424 -- XP_REFRESH_BTN = '//button[@aria-label="Refresh"]'
 XP_DATE_SELECTOR_DD = "//button[@id='timeperiod-select-button']"
 XP_DATE_SELECTOR_OPT = "//div[@id='timeperiod-select-container']//input/.."
 XP_DATE_SELECTOR_APPLY = "//div[@id='timeperiod-select-container']//*[normalize-space(text())='Apply']"
@@ -53,10 +53,10 @@ def goto_page(driver):
 	goto_url(driver,URL_PAGE,force=True)
 
 def wait_page_loaded(driver,timeout=10):
-	wait_for_clickable_xpath(driver,XP_REFRESH_BTN,timeout=timeout)
+	wait_for_clickable_xpath(driver,XP_DATE_SELECTOR_DD,timeout=timeout)
 
 def page_status(driver):
-	cur_tab_ele = driver.find_elements(By.XPATH,XP_REFRESH_BTN)
+	cur_tab_ele = driver.find_elements(By.XPATH,XP_DATE_SELECTOR_DD)
 	if(len(cur_tab_ele)>0):
 		return PAGE_STATUS_OK
 	else:
