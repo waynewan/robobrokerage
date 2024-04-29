@@ -5,8 +5,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import StaleElementReferenceException
+
 
 from .crawler_util import *
+from jackutil.microfunc import retry
 
 import pandas as pd
 import numpy as np
@@ -63,7 +66,7 @@ def account_label_map(driver):
 			label_to_ele[pvd_id] = ele
 	return label_to_ele
 
-def select_account(driver,partial_label):
+def __impl_select_account(driver,partial_label):
 	eles = driver.find_elements(By.XPATH,XP_MENU_ACCOUNTS)
 	for ele in eles:
 		pvd_id = ele.get_attribute("id")
@@ -77,4 +80,8 @@ def select_account(driver,partial_label):
 			return ele_text
 	return False
 
+def select_account(driver,partial_label):
+	def ftr():
+		return __impl_select_account(driver,partial_label)
+	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=False)
 

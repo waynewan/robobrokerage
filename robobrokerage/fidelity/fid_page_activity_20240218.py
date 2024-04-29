@@ -8,6 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import StaleElementReferenceException
 
 from .crawler_util import *
+from jackutil.microfunc import retry
 
 import pandas as pd
 import numpy as np
@@ -177,6 +178,11 @@ def select_orders_only(driver):
 			ut_switch_option_to(ele, "off")
 
 def view_all_txns(driver):
+	def ftr():
+		return __impl_view_all_txns(driver)
+	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=False)
+
+def __impl_view_all_txns(driver):
 	click(driver,XP_BTN,"Load more results")
 
 def expand_all(driver):
