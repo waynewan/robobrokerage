@@ -180,7 +180,7 @@ def select_orders_only(driver):
 def view_all_txns(driver):
 	def ftr():
 		return __impl_view_all_txns(driver)
-	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=False)
+	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=True)
 
 def __impl_view_all_txns(driver):
 	click(driver,XP_BTN,"Load more results")

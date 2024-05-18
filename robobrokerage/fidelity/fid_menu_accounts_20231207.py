@@ -83,5 +83,5 @@ def __impl_select_account(driver,partial_label):
 def select_account(driver,partial_label):
 	def ftr():
 		return __impl_select_account(driver,partial_label)
-	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=False)
+	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=True)
 

@@ -5,8 +5,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import StaleElementReferenceException
 
 from .crawler_util import *
+from jackutil.microfunc import retry
 
 import pandas as pd
 import numpy as np
@@ -188,8 +190,19 @@ def match_element(driver, ele, attrs=None):
 def select_stock(driver):
 	fid_new_order_select_option(driver, "trade", "stocks")
 
+# -- rm -- def select_account(driver,account):
+# -- rm -- 	def ftr():
+# -- rm -- 		return fid_new_order_select_option(driver, "account", account)
+# -- rm -- 	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=True)
+
 def select_account(driver,account):
-	return fid_new_order_select_option(driver, "account", account)
+	return retry(
+		lambda : fid_new_order_select_option(driver, "account", account),
+		exceptTypes=(StaleElementReferenceException),
+		retry=10,
+		rtnEx=False,
+		silent=True
+	)
 
 def select_action(driver,action):
 	return fid_new_order_select_option(driver, "action", action)
