@@ -16,7 +16,7 @@ from . import trade_common
 # from .fidelity import fid_menu_accounts
 from .fidelity import fid_menu_accounts_20231207 as fid_menu_accounts
 from .fidelity import fid_menu_site
-from .fidelity import fid_page_activity_20240218 as m_activity
+from .fidelity import fid_page_activity_20240522 as m_activity
 from .fidelity import fid_page_auth
 from .fidelity import fid_page_auth_20230916
 from .fidelity import fid_page_landing
