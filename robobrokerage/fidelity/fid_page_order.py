@@ -190,15 +190,10 @@ def match_element(driver, ele, attrs=None):
 def select_stock(driver):
 	fid_new_order_select_option(driver, "trade", "stocks")
 
-# -- rm -- def select_account(driver,account):
-# -- rm -- 	def ftr():
-# -- rm -- 		return fid_new_order_select_option(driver, "account", account)
-# -- rm -- 	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=True)
-
 def select_account(driver,account):
 	return retry(
 		lambda : fid_new_order_select_option(driver, "account", account),
-		exceptTypes=(StaleElementReferenceException),
+		exceptTypes=(StaleElementReferenceException,BaseException),
 		retry=10,
 		rtnEx=False,
 		silent=True
