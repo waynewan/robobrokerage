@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import argparse
 import datetime
 import getpass
@@ -20,7 +21,8 @@ from .fidelity import fid_page_activity_20240627 as m_activity
 from .fidelity import fid_page_auth
 from .fidelity import fid_page_auth_20230916
 from .fidelity import fid_page_landing
-from .fidelity import fid_page_order
+# from .fidelity import fid_page_order as pg_order
+from .fidelity import fid_page_order_20240919 as pg_order
 from .fidelity import fid_page_position_v1
 from .fidelity import fid_page_position_v2
 from .fidelity import fid_page_summary
@@ -146,8 +148,8 @@ class fidelity_webbroker:
 		m_activity.select_date_filter(self.driver,days_opt=days_opt)
 		m_activity.wait_page_loaded(self.driver)
 		# --
-		m_activity.view_all_txns(self.driver)
-		m_activity.wait_page_loaded(self.driver)
+		# -- rm -- m_activity.view_all_txns(self.driver)
+		# -- rm -- m_activity.wait_page_loaded(self.driver)
 		# --
 		raw_transactions = m_activity.raw_transactions(self.driver,incl_details=include_details)
 		formatted_transactions = m_activity.formatted_transactions(raw_transactions)
@@ -199,29 +201,29 @@ class fidelity_webbroker:
 		if(quantity<=0):
 			raise Exception(f"bad quantity:{quantity}")
 		# --
-		fid_page_order.goto_page_with_symbol(self.driver,symbol)
-		fid_page_order.raise_if_symbol_not_found(self.driver)
-		account_selected = fid_page_order.select_account(self.driver,account)
-		order_action = fid_page_order.select_action(self.driver,action)
-		fid_page_order.set_quantity(self.driver,quantity)
+		pg_order.goto_page_with_symbol(self.driver,symbol)
+		pg_order.raise_if_symbol_not_found(self.driver)
+		account_selected = pg_order.select_account(self.driver,account)
+		order_action = pg_order.select_action(self.driver,action)
+		pg_order.set_quantity(self.driver,quantity)
 		triggered_limit_price_rule = None
-		current_market = fid_page_order.get_current_market(self.driver)
+		current_market = pg_order.get_current_market(self.driver)
 		if(price is None or np.isnan(price)):
 			triggered_limit_price_rule,limit_price = trade_common.compute_limit_price(action=action,qty=quantity,**current_market)
-			fid_page_order.set_limit_price(self.driver,limit_price)
+			pg_order.set_limit_price(self.driver,limit_price)
 		else:
-			fid_page_order.set_limit_price(self.driver,price)
+			pg_order.set_limit_price(self.driver,price)
 			triggered_limit_price_rule = "Provided"
-		fid_page_order.set_day_order(self.driver)
-		fid_page_order.set_condition_none(self.driver)
+		pg_order.set_day_order(self.driver)
+		pg_order.set_condition_none(self.driver)
 		if(not auto_send):
 			return None
 		# --
-		fid_page_order.preview_order(self.driver)
-		ele = fid_page_order.wait_for_preview_accepted_or_error(self.driver)
+		pg_order.preview_order(self.driver)
+		ele = pg_order.wait_for_preview_accepted_or_error(self.driver)
 		if(type(ele)!=type({}) and ele.text.startswith("Error")):
 			raise Exception(ele.text)
-		preview = fid_page_order.get_preview(self.driver)
+		preview = pg_order.get_preview(self.driver)
 		preview["Price Rule"] = triggered_limit_price_rule
 		preview["Current Market"] = current_market
 		# --
@@ -232,9 +234,9 @@ class fidelity_webbroker:
 			if(preview['Cost']>capital_limit):
 				raise Exception('Failed capital limit test during preview')
 		# --
-		fid_page_order.send_order(self.driver)
-		fid_page_order.wait_page_new_order_btn(self.driver)
-		sent_order_result = fid_page_order.get_sent_order(self.driver)
+		pg_order.send_order(self.driver)
+		pg_order.wait_page_new_order_btn(self.driver)
+		sent_order_result = pg_order.get_sent_order(self.driver)
 		preview['Order#'] = sent_order_result['Order#']
 		return preview
 
