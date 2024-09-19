@@ -21,8 +21,9 @@ import os
 import sys
 import tempfile
 import time
-import locale
 import re
+from tqdm.auto import tqdm
+import locale
 locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
 
 # --
@@ -209,6 +210,15 @@ def collapse_all(driver):
 			pass
 
 def raw_transactions(driver,incl_details=True):
+	def ftr():
+		return __impl_raw_transactions(driver,incl_details=incl_details)
+	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=True)
+
+def __impl_raw_transactions(driver,incl_details=True):
+	# --
+	# -- expand the list if "Load more results" is found
+	# --
+	view_all_txns(driver)
 	# --
 	if(incl_details):
 		expand_all(driver)
@@ -233,7 +243,7 @@ def raw_transactions(driver,incl_details=True):
 	# --
 	orders = []
 	description_capturer = re.compile("[^(]*\(([^)]+)\).*")
-	for order in screen_row:
+	for order in tqdm(screen_row,leave=None,desc="txns"):
 		order1 = {}
 		# --
 		# -- data from single line entry
