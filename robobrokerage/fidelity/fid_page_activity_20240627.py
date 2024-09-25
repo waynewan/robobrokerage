@@ -128,6 +128,7 @@ def ut_is_stale(ele):
 txn_type_map = {
 	'DIVIDEND' : 'DIV',
 	'FOREIGN TAX' : 'F_TAX',
+	'FEE CHARGED' : 'FEE',
 }
 def txn_category(desc):
 	if(desc.find('DIVIDEND')>=0):
@@ -135,6 +136,8 @@ def txn_category(desc):
 			return "INTEREST"
 		else:
 			return txn_type_map["DIVIDEND"]
+	if(desc.find('FEE CHARGED')>=0):
+		return txn_type_map["FEE CHARGED"]
 	if(desc.find('FOREIGN TAX')>=0):
 		return txn_type_map["FOREIGN TAX"]
 	if(desc.find('TRANSFER')>=0):
@@ -242,7 +245,7 @@ def __impl_raw_transactions(driver,incl_details=True):
 	screen_row = driver.find_elements(By.XPATH, XP_ACTIVITY_ROW)
 	# --
 	orders = []
-	description_capturer = re.compile("[^(]*\(([^)]+)\).*")
+	symbol_capturer = re.compile(".*\((.*)\) *\(Cash\)")
 	for order in tqdm(screen_row,leave=None,desc="txns"):
 		order1 = {}
 		# --
@@ -260,7 +263,7 @@ def __impl_raw_transactions(driver,incl_details=True):
 		order1['Symbol'] = None
 		if(order1['Description'] is not None):
 			order1['Type'] = txn_category(order1['Description'])
-			matches = description_capturer.match(order1['Description'])
+			matches = symbol_capturer.match(order1['Description'])
 			if(matches is not None):
 				order1['Symbol'] = matches[1]
 		order1['Amount'] = cells[3].text
