@@ -46,10 +46,13 @@ def click(driver,xpath,name):
 	elements = driver.find_elements_by_xpath(xpath)
 	name = name.upper()
 	for ele in elements:
-		if(ele.text.upper()==name):
-			actual_text = ele.text
+		ele_text = ele.text
+		# print("click ... ",ele_text)
+		if(ele_text.upper()==name):
+			actual_text = ele_text
 			ele.click()
 			return ele
+	return None
 
 def wait_for_xpath(driver,xpath,also_visible=True,timeout=10):
 	if(also_visible):

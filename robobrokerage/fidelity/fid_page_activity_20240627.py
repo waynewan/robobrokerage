@@ -208,11 +208,11 @@ def select_orders_only(driver):
 
 def view_all_txns(driver):
 	def ftr():
-		return __impl_view_all_txns(driver)
-	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=True)
+		result = click(driver,XP_BTN,"Load more results")
+		if(result is None):
+			raise ValueError("No 'Load more results' button")
+	return retry(ftr,retry=10,exceptTypes=(ValueError,StaleElementReferenceException),rtnEx=False,silent=True)
 
-def __impl_view_all_txns(driver):
-	click(driver,XP_BTN,"Load more results")
 
 def expand_all(driver):
 	eles = driver.find_elements(By.XPATH,XP_ACTIVITY_ROW)
