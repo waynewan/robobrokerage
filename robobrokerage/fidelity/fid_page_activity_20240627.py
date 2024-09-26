@@ -183,6 +183,15 @@ def txn_category(desc):
 		return "REDEMPTION"
 	return 'UNK'
 
+def txn_symbol(desc):
+	symbol_capturer = re.compile(".* +(.*) +\(Cash\)")
+	matches = symbol_capturer.match(desc)
+	if(matches is None):
+		return f'NO_MATCH_ERR:{desc}'
+	symbol = matches[1]
+	symbol = symbol.replace('(','').replace(')','')
+	return symbol
+
 # --
 # -- actions
 # --
@@ -275,7 +284,6 @@ def __impl_raw_transactions(driver,incl_details=True):
 	screen_row = driver.find_elements(By.XPATH, XP_ACTIVITY_ROW)
 	# --
 	orders = []
-	symbol_capturer = re.compile(".*\((.*)\) *\(Cash\)")
 	for order in tqdm(screen_row,leave=None,desc="txns"):
 		order1 = {}
 		# --
@@ -293,9 +301,7 @@ def __impl_raw_transactions(driver,incl_details=True):
 		order1['Symbol'] = None
 		if(order1['Description'] is not None):
 			order1['Type'] = txn_category(order1['Description'])
-			matches = symbol_capturer.match(order1['Description'])
-			if(matches is not None):
-				order1['Symbol'] = matches[1]
+			order1['Symbol'] = txn_symbol(order1['Description'])
 		order1['Amount'] = cells[3].text
 		order1['Balance'] = cells[4].text
 		order1['Details'] = ""
