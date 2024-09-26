@@ -207,12 +207,17 @@ def select_orders_only(driver):
 			ut_switch_option_to(ele, "off")
 
 def view_all_txns(driver):
+	err_msg = "No 'Load more results' button"
 	def ftr():
 		result = click(driver,XP_BTN,"Load more results")
 		if(result is None):
-			raise ValueError("No 'Load more results' button")
-	return retry(ftr,retry=10,exceptTypes=(ValueError,StaleElementReferenceException),rtnEx=False,silent=True)
-
+			raise ValueError(err_msg)
+	_,errors = retry(ftr,retry=10,exceptTypes=(ValueError,StaleElementReferenceException),rtnEx=True,silent=True)
+	err = errors[-1]
+	if(type(err)==type(ValueError()) and str(err)==err_msg):
+		return
+	else:
+		raise err
 
 def expand_all(driver):
 	eles = driver.find_elements(By.XPATH,XP_ACTIVITY_ROW)
