@@ -44,6 +44,8 @@ XP_ACTIVITY_ROW = '//activity-list//div[@role="row"][1]'
 XP_ACTIVITY_DETAILS = '//activity-order-detail-panel'
 XP_ACT_EXPANDED = ".//div[@aria-label='show info'][@aria-expanded='true']"
 XP_ACT_COLLAPSED = ".//div[@role='button'][@aria-expanded='false']"
+XP_INPUT_FROM_DATE = "//input[@label='From Date']"
+XP_INPUT__TO__DATE = "//input[@label='To Date']"
 # --
 PAGE_STATUS_UNKNOWN = "__PAGE_STATUS_UNKNOWN__"
 PAGE_STATUS_OK = "__PAGE_STATUS_OK__"
@@ -67,7 +69,26 @@ def page_status(driver):
 # --
 # -- actions
 # --
+def select_date_filter_custom(driver,fromdate,todate):
+	inp_from_date = driver.find_element(By.XPATH,XP_INPUT_FROM_DATE)
+	inp_from_date.clear()
+	inp_from_date.send_keys(fromdate)
+	# --
+	inp__to__date = driver.find_element(By.XPATH,XP_INPUT__TO__DATE)
+	inp__to__date.clear()
+	inp__to__date.send_keys(todate)
+#	# --
+#	apply_btn = driver.find_element(By.XPATH,XP_DATE_SELECTOR_APPLY)
+#	apply_btn.click()
+#	return True
+
+# --
+# -- fromdate,todate: mm/dd/yyyy
+# --
 def select_date_filter(driver,days_opt):
+	fromdate,todate = ( None,None )
+	if(days_opt.startswith("Custom")):
+		days_opt,fromdate,todate = days_opt.split(",")
 	# --
 	# -- click date filter to show options
 	# --
@@ -83,10 +104,14 @@ def select_date_filter(driver,days_opt):
 		if(days_opt.upper() in option_text.upper()):
 			option.click()
 			# --
+			if(days_opt=="Custom"):
+				select_date_filter_custom(driver,fromdate,todate)
+			# --
 			# -- click APPLY to activate the filtering
 			# --
 			apply_btn = driver.find_element(By.XPATH,XP_DATE_SELECTOR_APPLY)
 			apply_btn.click()
+			# --
 			return option_text
 	# --
 	# -- nothing match, close the drop-down
