@@ -21,8 +21,8 @@ from .fidelity import fid_page_activity_20240627 as m_activity
 from .fidelity import fid_page_auth
 from .fidelity import fid_page_auth_20230916
 from .fidelity import fid_page_landing
-# from .fidelity import fid_page_order as pg_order
-from .fidelity import fid_page_order_20240919 as pg_order
+# from .fidelity import fid_page_order_20240919 as pg_order
+from .fidelity import fid_page_order_20241015 as pg_order
 from .fidelity import fid_page_position_v1
 from .fidelity import fid_page_position_v2
 from .fidelity import fid_page_summary
