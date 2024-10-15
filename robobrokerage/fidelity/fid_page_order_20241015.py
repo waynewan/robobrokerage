@@ -123,9 +123,7 @@ def fid_new_order_select_option(driver, list_name, option_name):
 			continue
 		if(lines[0].upper().startswith('WARNING:')):
 			popped = lines.pop(0)
-			print(f"popped:'{popped}'")
 		button_name = lines[0]
-		print(list_name,lines,button_name)
 		if(list_name.lower() in button_name.lower()):
 			ele.click()
 			break
