@@ -25,7 +25,7 @@ from .fidelity import fid_page_landing
 from .fidelity import fid_page_order_20241015 as pg_order
 from .fidelity import fid_page_position_v1
 from .fidelity import fid_page_position_v2
-from .fidelity import fid_page_summary
+from .fidelity import fid_page_summary_20241115 as fid_page_summary
 
 # --
 # --
