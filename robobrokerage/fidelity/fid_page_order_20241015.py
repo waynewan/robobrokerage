@@ -110,7 +110,10 @@ def page_status(driver):
 # --
 # -- helper
 # --
-# -- XPATH_STR_FORM_BTN = "//order-entry-base//button"
+def click_btn(driver, btn_xpath):
+	btn_ele = driver.find_element(By.XPATH,btn_xpath)
+	btn_ele.click()
+
 XPATH_STR_FORM_BTN = "//div[@class='eq-ticket__ticket-container']//button"
 def fid_new_order_select_option(driver, list_name, option_name):
 	# --
@@ -192,7 +195,14 @@ def match_element(driver, ele, attrs=None):
 # -- actions
 # --
 def select_stock(driver):
-	fid_new_order_select_option(driver, "trade", "stocks")
+	return retry(
+		lambda : fid_new_order_select_option(driver, "trade", "stocks"),
+		exceptTypes=(StaleElementReferenceException,BaseException),
+		retry=10,
+		rtnEx=False,
+		silent=True
+	)
+	# -- rm -- fid_new_order_select_option(driver, "trade", "stocks")
 
 def select_account(driver,account):
 	return retry(
@@ -204,15 +214,36 @@ def select_account(driver,account):
 	)
 
 def select_action(driver,action):
-	return fid_new_order_select_option(driver, "action", action)
+	return retry(
+		lambda : fid_new_order_select_option(driver, "action", action),
+		exceptTypes=(StaleElementReferenceException,BaseException),
+		retry=10,
+		rtnEx=False,
+		silent=True
+	)
+	# -- rm -- return fid_new_order_select_option(driver, "action", action)
 
 def preview_order(driver):
-	preview_btn = driver.find_element(By.XPATH,XP_PREVIEW_BTN)
-	preview_btn.click()
+	return retry(
+		lambda : click_btn(driver, XP_PREVIEW_BTN),
+		exceptTypes=(NoSuchElementException,BaseException),
+		retry=10,
+		rtnEx=False,
+		silent=True
+	)
+	# -- rm -- preview_btn = driver.find_element(By.XPATH,XP_PREVIEW_BTN)
+	# -- rm -- preview_btn.click()
 
 def send_order(driver):
-	place_order_btn = driver.find_element(By.XPATH,XP_PLACE_ORDER_BTN)
-	place_order_btn.click()
+	return retry(
+		lambda : click_btn(driver, XP_PLACE_ORDER_BTN),
+		exceptTypes=(NoSuchElementException,BaseException),
+		retry=10,
+		rtnEx=False,
+		silent=True
+	)
+	# -- rm -- place_order_btn = driver.find_element(By.XPATH,XP_PLACE_ORDER_BTN)
+	# -- rm -- place_order_btn.click()
 
 def set_quantity(driver,quantity):
 	fid_new_order_enter_text(driver, "Quantity", "{}".format(quantity))
