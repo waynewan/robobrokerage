@@ -28,9 +28,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
 # --
 URL_PAGE = "https://digital.fidelity.com/ftgw/digital/portfolio/positions"
 # --
-# -- rm -- XP_OVERVIEW_TAB = '//div[@id="posweb-grid_top"]//*[text()="Overview"]'
 XP_OVERVIEW_TAB = '//option[text()="Overview"]'
-XP_DIVIDEND_VIEW_TAB = '//div[@id="posweb-grid_top"]//*[text()="Dividend View"]'
 XP_REFRESH = '//div[@id="posweb-grid_top"]//button[@aria-label="Refresh Positions"]'
 XP_POSITION_TABLE_HEADER = '//div[@id="posweb-grid"]//*[@role="columnheader"]'
 XP_POSITION_TABLE_DATA = '//div[@id="posweb-grid"]//*[@role="rowgroup"]/*[@role="row"][@row-index]'
@@ -59,12 +57,20 @@ def page_status(driver):
 # -- actions
 # --
 def select_overview_tab(driver):
-	orders_tab = driver.find_element(By.XPATH,XP_OVERVIEW_TAB)
-	orders_tab.click()
+	pos_view_select = driver.find_element(By.XPATH,XP_OVERVIEW_TAB+"/parent::select")
+	select_option_relax(pos_view_select, "Overview")
 
 def select_dividend_view_tab(driver):
-	orders_tab = driver.find_element(By.XPATH,XP_DIVIDEND_VIEW_TAB)
-	orders_tab.click()
+	pos_view_select = driver.find_element(By.XPATH,XP_OVERVIEW_TAB+"/parent::select")
+	select_option_relax(pos_view_select, "Dividend")
+
+def select_closed_positions_tab(driver):
+	pos_view_select = driver.find_element(By.XPATH,XP_OVERVIEW_TAB+"/parent::select")
+	select_option_relax(pos_view_select, "Closed")
+
+def select_fund_performance_tab(driver):
+	pos_view_select = driver.find_element(By.XPATH,XP_OVERVIEW_TAB+"/parent::select")
+	select_option_relax(pos_view_select, "Perform")
 
 def select_refresh_positions(driver):
 	orders_tab = driver.find_element(By.XPATH,XP_REFRESH)

@@ -25,6 +25,14 @@ def select_option(select_ele,select_text):
 			return option
 	return None
 
+def select_option_relax(select_ele,select_text):
+	for option in select_ele.find_elements_by_tag_name('option'):
+		opt_text = option.text
+		if(select_text.upper() in opt_text.upper()):
+			option.click()
+			return option,opt_text
+	return None
+
 def goto_url(driver,url,force=False,params=None):
 	if(params is not None and len(params)!=0):
 		url = url.format(*params)
