@@ -165,11 +165,12 @@ class fidelity_webbroker:
 		fid_page_position_v2.goto_page(self.driver)
 		fid_page_position_v2.wait_page_loaded(self.driver)
 		# --
-		fid_page_position_v2.select_overview_tab(self.driver)
-		fid_page_position_v2.wait_page_loaded(self.driver)
-		# --
 		fid_menu_accounts.select_account(self.driver,subacct)
 		fid_page_position_v2.wait_page_loaded(self.driver)
+		# --
+		fid_page_position_v2.select_overview_tab(self.driver)
+		fid_page_position_v2.wait_page_loaded(self.driver)
+		time.sleep(2)
 		# --
 		header = fid_page_position_v2.raw_header(self.driver)
 		raw_data = fid_page_position_v2.raw_data(self.driver,header=header)
