@@ -186,6 +186,10 @@ class fidelity_webbroker:
 			else:
 				return expanded
 		else:
+			# !!
+			# !! fid_page_position_v2 has no format_position_table function
+			# !! verify if fid_page_position_v2 still in use
+			# !!
 			formatted = data_formatter.format_position_table(expanded)
 			if(include_raw):
 				return (raw_data,expanded,formatted)
