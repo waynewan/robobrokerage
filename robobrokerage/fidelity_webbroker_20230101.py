@@ -161,7 +161,15 @@ class fidelity_webbroker:
 	# --
 	# --
 	# --
-	def get_positions(self,*,subacct=None,include_raw=False,parse_col=True):
+	def get_positions(self,*,subacct=None,include_raw=False,parse_col=True,activate_hack=False):
+		if(activate_hack):
+			# --
+			# -- ## HACK ## make window bigger to display all columns
+			# !! zoom doesn't work, for technical reason !!
+			# --
+			self.driver.set_window_size(2400,2560)
+			self.driver.set_window_position(0,0)
+		# --
 		fid_page_position_v2.goto_page(self.driver)
 		fid_page_position_v2.wait_page_loaded(self.driver)
 		# --
@@ -171,6 +179,13 @@ class fidelity_webbroker:
 		fid_page_position_v2.select_overview_tab(self.driver)
 		fid_page_position_v2.wait_page_loaded(self.driver)
 		time.sleep(2)
+		if(activate_hack):
+			# --
+			# -- ## HACK ## return to normal
+			# --
+			self.driver.set_window_size(1440,2560)
+			self.driver.set_window_position(0,0)
+			self.driver.maximize_window()
 		# --
 		header = fid_page_position_v2.raw_header(self.driver)
 		raw_data = fid_page_position_v2.raw_data(self.driver,header=header)
