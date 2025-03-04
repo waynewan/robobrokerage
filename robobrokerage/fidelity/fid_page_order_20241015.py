@@ -119,7 +119,7 @@ def fid_new_order_select_option(driver, list_name, option_name):
 	# --
 	# -- find the dropbox, and click it to show the option list
 	# --
-	drop_list = None
+	drop_list_btn = None
 	for ele in driver.find_elements_by_xpath(XPATH_STR_FORM_BTN):
 		lines = ele.text.splitlines()
 		if(len(lines)==0):
@@ -128,13 +128,17 @@ def fid_new_order_select_option(driver, list_name, option_name):
 			popped = lines.pop(0)
 		button_name = lines[0]
 		if(list_name.lower() in button_name.lower()):
+			drop_list_btn = ele
 			ele.click()
 			break
+	if(drop_list_btn is None):
+		raise BaseException("Cannot find dropbox name:" + list_name)
 	# --
 	# -- drop list loading 
 	# -- !! could take time if connection is slow !!
 	# --
-	for sltime in (0.3, 0.5, 1.0):
+	drop_list = None
+	for sltime in (0.3, 0.5, 1.0, 2.0):
 		time.sleep(sltime)
 		drop_list = driver.find_elements_by_xpath("//div[@role='option']")
 		if(len(drop_list)>0):
@@ -142,8 +146,11 @@ def fid_new_order_select_option(driver, list_name, option_name):
 		drop_list = driver.find_elements_by_xpath("//li[@role='presentation']")
 		if(len(drop_list)>0):
 			break
+		drop_list = driver.find_elements_by_xpath("//div[@role='listbox']/*/*[@role='option']")
+		if(len(drop_list)>0):
+			break
 	if(len(drop_list)==0):
-		raise BaseException("Cannot find dropbox name:" + list_name)
+		raise BaseException("Cannot load dropbox name:" + list_name)
 	# --
 	# -- find the right option
 	# --
@@ -202,7 +209,6 @@ def select_stock(driver):
 		rtnEx=False,
 		silent=True
 	)
-	# -- rm -- fid_new_order_select_option(driver, "trade", "stocks")
 
 def select_account(driver,account):
 	return retry(
@@ -221,7 +227,6 @@ def select_action(driver,action):
 		rtnEx=False,
 		silent=True
 	)
-	# -- rm -- return fid_new_order_select_option(driver, "action", action)
 
 def preview_order(driver):
 	return retry(
