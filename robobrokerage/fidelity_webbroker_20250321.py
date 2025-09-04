@@ -24,7 +24,7 @@ from .fidelity import fid_page_landing
 # from .fidelity import fid_page_order_20240919 as pg_order
 from .fidelity import fid_page_order_20241015 as pg_order
 from .fidelity import fid_page_position_v1
-from .fidelity import fid_page_position_v2
+from .fidelity import fid_page_position_v3 as fid_page_position_def
 from .fidelity import fid_page_summary_20241115 as fid_page_summary
 
 # --
@@ -170,14 +170,14 @@ class fidelity_webbroker:
 			self.driver.set_window_size(2400,2560)
 			self.driver.set_window_position(0,0)
 		# --
-		fid_page_position_v2.goto_page(self.driver)
-		fid_page_position_v2.wait_page_loaded(self.driver)
+		fid_page_position_def.goto_page(self.driver)
+		fid_page_position_def.wait_page_loaded(self.driver)
 		# --
 		fid_menu_accounts.select_account(self.driver,subacct)
-		fid_page_position_v2.wait_page_loaded(self.driver)
+		fid_page_position_def.wait_page_loaded(self.driver)
 		# --
-		fid_page_position_v2.select_overview_tab(self.driver)
-		fid_page_position_v2.wait_page_loaded(self.driver)
+		fid_page_position_def.select_overview_tab(self.driver)
+		fid_page_position_def.wait_page_loaded(self.driver)
 		time.sleep(2)
 		if(activate_hack):
 			# --
@@ -187,11 +187,11 @@ class fidelity_webbroker:
 			self.driver.set_window_position(0,0)
 			self.driver.maximize_window()
 		# --
-		header = fid_page_position_v2.raw_header(self.driver)
-		raw_data = fid_page_position_v2.raw_data(self.driver,header=header)
+		header = fid_page_position_def.raw_header(self.driver)
+		raw_data = fid_page_position_def.raw_data(self.driver,header=header)
 		# --
-		data_formatter = fid_page_position_v2
-		if(not fid_page_position_v2.verify_header_version(header)):
+		data_formatter = fid_page_position_def
+		if(not fid_page_position_def.verify_header_version(header)):
 			data_formatter = fid_page_position_v1
 		# --
 		expanded = data_formatter.expand_position_table(raw_data)
@@ -202,8 +202,8 @@ class fidelity_webbroker:
 				return expanded
 		else:
 			# !!
-			# !! fid_page_position_v2 has no format_position_table function
-			# !! verify if fid_page_position_v2 still in use
+			# !! fid_page_position_def has no format_position_table function
+			# !! verify if fid_page_position_def still in use
 			# !!
 			formatted = data_formatter.format_position_table(expanded)
 			if(include_raw):
