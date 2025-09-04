@@ -135,9 +135,6 @@ def expand_position_table(df0):
 	df1.drop(columns=['__IGNORE__'],inplace=True)
 	return df1
 
-def format_position_table(data):
-	return data
-
 def process_simple_col(series,header=None):
 	df0 = pd.DataFrame(series.str.split('\n').tolist())
 	if(header is not None):
@@ -233,4 +230,44 @@ def formatted_position_table(header,data,parse_col=True):
 	# --
 	# --
 	return df1
+
+def format_val_remove_char(rm_regex,defVal=np.nan):
+	def ff(colval):
+		if(colval is None):
+			return defVal
+		return rm_regex.sub('',colval)
+	return ff
+
+def format_col_to_numeric(colval,rm_fn=format_val_remove_char(re.compile('[$,%]'))):
+	if(colval is None):
+		return np.nan
+	if(type(colval)==type(np.nan)):
+		return colval
+	if('--' in colval):
+		return np.nan
+	return float( rm_fn(colval) )
+
+def format_position_table(data):
+	data = data.copy()
+	data.fillna(np.nan,inplace=True)
+	data.replace("n/a",np.nan,inplace=True)
+	data.replace("--",np.nan,inplace=True)
+	data.replace("",np.nan,inplace=True)
+	# --
+	# !! not using list and loop, because this is easier for debugging !!
+	# --
+	data['Last Price'] = data['Last Price'].apply(format_col_to_numeric)
+	data['Price Change'] = data['Price Change'].apply(format_col_to_numeric)
+	data['$ Gain/Loss'] = data['$ Gain/Loss'].apply(format_col_to_numeric)
+	data['% Gain/Loss'] = data['% Gain/Loss'].apply(format_col_to_numeric)
+	data['$ Total Gain/Loss'] = data['$ Total Gain/Loss'].apply(format_col_to_numeric)
+	data['% Total Gain/Loss'] = data['% Total Gain/Loss'].apply(format_col_to_numeric)
+	data['Current Value'] = data['Current Value'].apply(format_col_to_numeric)
+	data['% of Account'] = data['% of Account'].apply(format_col_to_numeric)
+	data['Quantity'] = data['Quantity'].apply(format_col_to_numeric)
+	data['Per Share'] = data['Per Share'].apply(format_col_to_numeric)
+	data['Total Cost'] = data['Total Cost'].apply(format_col_to_numeric)
+	data['52w lo'] = data['52w lo'].apply(format_col_to_numeric)
+	data['52w hi'] = data['52w hi'].apply(format_col_to_numeric)
+	return data
 
