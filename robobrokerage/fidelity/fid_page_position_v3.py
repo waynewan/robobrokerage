@@ -140,6 +140,9 @@ def process_simple_col(series,header=None):
 	if(header is not None):
 		if(type(header)==type('')):
 			header = header.split(',')
+		if(len(df0.columns) !=len(header)):
+			print(f"WARN: df0,header count mismaatch: force matching: was (header,df0.columns)=({header},{df0.columns})")
+			df0 = df0.iloc[:,0:len(header)]
 		df0.columns = header
 	return df0
 
