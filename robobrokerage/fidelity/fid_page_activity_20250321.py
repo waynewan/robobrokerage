@@ -33,11 +33,13 @@ URL_PAGE = "https://digital.fidelity.com/ftgw/digital/portfolio/activity"
 # --
 # -- rm on 20240307 -- XP_REFRESH_BTN = '//pvd3-link[@pvd-aria-label="Refresh"]'
 # -- rm on 20240424 -- XP_REFRESH_BTN = '//button[@aria-label="Refresh"]'
-XP_DATE_SELECTOR_DD = "//button[@id='timeperiod-select-button']"
+# -- rm on 20250930 -- XP_DATE_SELECTOR_DD = "//button[@id='timeperiod-select-button']"
+XP_DATE_SELECTOR_DD = "//timeperiod-filter//button"
 XP_DATE_SELECTOR_OPT = "//div[@id='timeperiod-select-container']//input/.."
 XP_DATE_SELECTOR_APPLY = "//div[@id='timeperiod-select-container']//*[normalize-space(text())='Apply']"
 XP_LEGACY_PAGE_BTN = "//a[text()='legacy portfolio activity page']"
-XP_FILTER_OPTIONS = '//core-filter-button//button'
+# -- rm on 20250930 -- XP_FILTER_OPTIONS = '//core-filter-button//button'
+XP_FILTER_OPTIONS = '//div[@class="activity-order-menu-area"]//activity-order-filter-button//button'
 XP_FILTER_OPT_BTN = './s-root/div/label'
 XP_BTN = '//button'
 XP_ACTIVITY_ROW = '//activity-list//div[@role="row"][1]'
@@ -93,7 +95,6 @@ def select_date_filter(driver,days_opt):
 	# --
 	# -- click date filter to show options
 	# --
-	# date_filter_dd = driver.find_element(By.XPATH,XP_DATE_SELECTOR_DD)
 	date_filter_dd = wait_for_clickable_xpath(driver,XP_DATE_SELECTOR_DD,timeout=10)
 	date_filter_dd.click()
 	# --
@@ -132,24 +133,30 @@ def goto_legacy(driver):
 # --
 # -- utility
 # --
-def ut_switch_option_to(ele,new_state):
-	pressed = ele.get_attribute("aria-pressed")
-	if(pressed is None):
+def __ut_switch_option_to(ele,new_state):
+	pressed_state = ele.get_attribute("aria-pressed")
+	if(pressed_state is None):
 		return None
-	pressed = pressed.upper()=="TRUE"
-	want_off = new_state.upper()=="ON"
-	if(want_off != pressed):
-		btn = ele # ele.find_element(By.XPATH,XP_FILTER_OPT_BTN)
-		btn.click()
-	pressed = ele.get_attribute("aria-pressed")
-	return pressed
+	pressed = pressed_state.upper()=="TRUE"
+	want_on = new_state.upper()=="ON"
+	if(want_on != pressed):
+		ele.click()
+		return True
+	return False
+
+def ut_switch_option_to(ele,new_state):
+	for ii in range(0,15):
+		pressed = __ut_switch_option_to(ele,new_state)
+		if(not pressed):
+			break
+		time.sleep(1.0)
+	return ele.get_attribute("aria-pressed")
 
 def ut_is_stale(ele):
 	try:
-		_ = ele.text
-		return False
+		return ele.text
 	except (StaleElementReferenceException,NoSuchElementException) as ex:
-		return True
+		return None
 
 txn_type_map = {
 	'DIVIDEND' : 'DIV',
@@ -199,22 +206,24 @@ def txn_symbol(desc):
 def select_history_only(driver):
 	eles = driver.find_elements(By.XPATH,XP_FILTER_OPTIONS)
 	for ele in eles:
-		if(ut_is_stale(ele)):
+		ele_txt = ut_is_stale(ele)
+		if(ele_txt is None):
 			continue
-		if(ele.text.find("History")>=0):
-			ut_switch_option_to(ele, "on")
+		if(ele_txt.find("History")>=0):
+			new_state = ut_switch_option_to(ele, "on")
 		else:
-			ut_switch_option_to(ele, "off")
+			new_state = ut_switch_option_to(ele, "off")
 
 def select_orders_only(driver):
 	eles = driver.find_elements(By.XPATH,XP_FILTER_OPTIONS)
 	for ele in eles:
-		if(ut_is_stale(ele)):
+		ele_txt = ut_is_stale(ele)
+		if(ele_txt is None):
 			continue
-		if(ele.text.find("Orders")>=0):
-			ut_switch_option_to(ele, "on")
+		if(ele_txt.find("Orders")>=0):
+			new_state = ut_switch_option_to(ele, "on")
 		else:
-			ut_switch_option_to(ele, "off")
+			new_state = ut_switch_option_to(ele, "off")
 
 def view_all_txns(driver):
 	err_msg = "No 'Load more results' button"
