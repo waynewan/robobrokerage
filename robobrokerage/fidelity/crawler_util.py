@@ -8,25 +8,29 @@ from selenium.common.exceptions import NoSuchElementException
 
 def find_element_by_xpath_if_exist(driver,xpath):
 	try:
-		return driver.find_element_by_xpath(xpath)
+		# return driver.find_element_by_xpath(xpath)
+		return driver.find_element(By.XPATH,xpath)
 	except NoSuchElementException:
 		return None
 
 def find_elements_by_xpath_if_exist(driver,xpath):
 	try:
-		return driver.find_elements_by_xpath(xpath)
+		# return driver.find_elements_by_xpath(xpath)
+		return driver.find_elements(By.XPATH, xpath)
 	except NoSuchElementException:
 		return None
 
 def select_option(select_ele,select_text):
-	for option in select_ele.find_elements_by_tag_name('option'):
+	# for option in select_ele.find_elements_by_tag_name('option'):
+	for option in select_ele.find_elements(By.TAG_NAME, 'option'):
 		if(option.text==select_text):
 			option.click()
 			return option
 	return None
 
 def select_option_relax(select_ele,select_text):
-	for option in select_ele.find_elements_by_tag_name('option'):
+	# for option in select_ele.find_elements_by_tag_name('option'):
+	for option in select_ele.find_elements(By.TAG_NAME, 'option'):
 		opt_text = option.text
 		if(select_text.upper() in opt_text.upper()):
 			option.click()
@@ -41,7 +45,8 @@ def goto_url(driver,url,force=False,params=None):
 	driver.get(url)
 	
 def click_partial_match(driver,xpath,name):
-	elements = driver.find_elements_by_xpath(xpath)
+	# elements = driver.find_elements_by_xpath(xpath)
+	elements = driver.find_elements(By.XPATH, xpath)
 	name = name.upper()
 	for ele in elements:
 		if(name in ele.text.upper()):
@@ -51,7 +56,8 @@ def click_partial_match(driver,xpath,name):
 	return None
 
 def click(driver,xpath,name):
-	elements = driver.find_elements_by_xpath(xpath)
+	# elements = driver.find_elements_by_xpath(xpath)
+	elements = driver.find_elements(By.XPATH, xpath)
 	name = name.upper()
 	for ele in elements:
 		ele_text = ele.text
