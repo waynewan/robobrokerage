@@ -9,6 +9,7 @@ from selenium.common.exceptions import StaleElementReferenceException
 
 from .crawler_util import *
 from jackutil.microfunc import retry
+from jackutil.microfunc import str_to_dt,today,days_away
 
 import pandas as pd
 import numpy as np
@@ -238,12 +239,19 @@ def view_all_txns(driver):
 	else:
 		raise err
 
+def expand_1_txn(driver,ele):
+	try:
+		subele = ele.find_elements(By.XPATH,XP_ACT_COLLAPSED)
+		if(len(subele)>0):
+			ele.click()
+	except:
+		pass
+
 def expand_all(driver):
 	eles = driver.find_elements(By.XPATH,XP_ACTIVITY_ROW)
 	eles.reverse()
 	for ele in eles:
 		try:
-			# subele = ele.find_elements(By.XPATH,".//div[@aria-label='show info'][@aria-expanded='false']")
 			subele = ele.find_elements(By.XPATH,XP_ACT_COLLAPSED)
 			if(len(subele)>0):
 				ele.click()
@@ -254,26 +262,26 @@ def collapse_all(driver):
 	eles = driver.find_elements(By.XPATH,XP_ACTIVITY_ROW)
 	for ele in eles:
 		try:
-			# subele = ele.find_elements(By.XPATH,".//div[@aria-label='show info'][@aria-expanded='true']")
 			subele = ele.find_elements(By.XPATH,XP_ACT_EXPANDED)
 			if(len(subele)>0):
 				ele.click()
 		except:
 			pass
 
-def raw_transactions(driver,incl_details=True):
+def raw_transactions(driver,incl_details=True,cutoff_dt=today(),cutoff_dt_width=-2):
+	cutoff_dt = days_away(cutoff_dt,cutoff_dt_width)
 	def ftr():
-		return __impl_raw_transactions(driver,incl_details=incl_details)
+		return __impl_raw_transactions(driver,incl_details=incl_details,cutoff_dt=cutoff_dt)
 	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=True)
 
-def __impl_raw_transactions(driver,incl_details=True):
+def __impl_raw_transactions(driver,incl_details=True,cutoff_dt=None):
 	# --
 	# -- expand the list if "Load more results" is found
 	# --
 	view_all_txns(driver)
 	# --
-	if(incl_details):
-		expand_all(driver)
+#	if(incl_details):
+#		expand_all(driver)
 	# --
 	def process_order(order):
 		data = {}
@@ -310,6 +318,19 @@ def __impl_raw_transactions(driver,incl_details=True):
 	# --
 	orders = []
 	for order in tqdm(screen_row,leave=None,desc="txns"):
+		# --
+		# -- expand only rows that is needed (after cutoff_dt)
+		# --
+		txn_data = order.text.split('\n')
+		# -- DEBUG -- print(f"{txn_data}")
+		if(len(txn_data)<=1):
+			continue
+		if(str_to_dt(txn_data[0],fmt='%b-%d-%Y').date() < cutoff_dt):
+			continue
+		expand_1_txn(driver,order)
+		# --
+		# --
+		# --
 		order1 = {}
 		# --
 		# -- data from single line entry

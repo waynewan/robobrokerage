@@ -86,7 +86,7 @@ def wait_for_preview_accepted_or_error(driver,timeout=60):
 			return get_preview(driver)
 		except:
 			pass
-		elements = driver.find_elements_by_xpath(XP_PREVIEW_ERROR)
+		elements = driver.find_elements(By.XPATH,XP_PREVIEW_ERROR)
 		if(len(elements)>0 and len(elements[0].text)>0):
 			print(f"ERROR:'{elements[0].text}'")
 			return elements[0]
@@ -116,7 +116,7 @@ def fid_new_order_select_option(driver, list_name, option_name):
 	# -- find the dropbox, and click it to show the option list
 	# --
 	drop_list = None
-	for ele in driver.find_elements_by_xpath(XPATH_STR_FORM_BTN):
+	for ele in driver.find_elements(By.XPATH,XPATH_STR_FORM_BTN):
 		lines = ele.text.splitlines()
 		if(len(lines)==0):
 			continue
@@ -130,10 +130,10 @@ def fid_new_order_select_option(driver, list_name, option_name):
 	# --
 	for sltime in (0.3, 0.5, 1.0):
 		time.sleep(sltime)
-		drop_list = driver.find_elements_by_xpath("//div[@role='option']")
+		drop_list = driver.find_elements(By.XPATH,"//div[@role='option']")
 		if(len(drop_list)>0):
 			break
-		drop_list = driver.find_elements_by_xpath("//li[@role='presentation']")
+		drop_list = driver.find_elements(By.XPATH,"//li[@role='presentation']")
 		if(len(drop_list)>0):
 			break
 	if(len(drop_list)==0):
@@ -159,9 +159,9 @@ XPATH_STR_FORM_INP = "//order-entry-base//input/.."
 def fid_new_order_enter_text(driver, box_label, inp_text):
 	req = {"id":[str.startswith,"eqt-"]}
 	inp_box_ele = None
-	for ele in driver.find_elements_by_xpath(XPATH_STR_FORM_INP):
+	for ele in driver.find_elements(By.XPATH,XPATH_STR_FORM_INP):
 		if(box_label.lower() in ele.text.lower()):
-			inp_box_ele = ele.find_element_by_xpath("input")
+			inp_box_ele = ele.find_element(By.XPATH,"input")
 			if(not match_element(driver, inp_box_ele, req)):
 				continue
 			inp_box_ele.clear()
@@ -232,7 +232,7 @@ def get_current_market(driver,timeout=10):
 	XPATH_STR_FULL_ORD_QUOTE_PANEL = '//*[@id="quote-panel"]'
 	XPATH_STR_FULL_ORD_BID_ASK_ELE = '//div[@class="block-price-layout"]//span[@class="number"]'
 	quote_panel = WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((By.XPATH,XPATH_STR_FULL_ORD_QUOTE_PANEL)))
-	bid_ask_eles = quote_panel.find_elements_by_xpath(XPATH_STR_FULL_ORD_BID_ASK_ELE)
+	bid_ask_eles = quote_panel.find_elements(By.XPATH,XPATH_STR_FULL_ORD_BID_ASK_ELE)
 	bid_price,ask_price = float(bid_ask_eles[0].text),float(bid_ask_eles[1].text)
 	return { "bid_price":bid_price,"ask_price":ask_price }
 
@@ -245,12 +245,12 @@ def get_preview(driver):
 	items['Quantity'] = locale.atof(items['Quantity'].strip("$"))
 	# --
 	warning_msg = []
-	warnings = driver.find_elements_by_xpath(XP_PREVIEW_WARNING)
+	warnings = driver.find_elements(By.XPATH,XP_PREVIEW_WARNING)
 	for warning in warnings:
 		warning_msg.append(warning.text)
 	items['Warning'] = warning_msg
 	# --
-	est_cost_ele = driver.find_element_by_xpath(XP_PREVIEW_EST_COST)
+	est_cost_ele = driver.find_element(By.XPATH,XP_PREVIEW_EST_COST)
 	est_cost = locale.atof(est_cost_ele.text.split("\n")[1].strip("$"))
 	items['Cost'] = est_cost
 	return items
