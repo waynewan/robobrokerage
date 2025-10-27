@@ -325,9 +325,16 @@ def __impl_raw_transactions(driver,incl_details=True,cutoff_dt=None):
 		# -- DEBUG -- print(f"{txn_data}")
 		if(len(txn_data)<=1):
 			continue
-		if(str_to_dt(txn_data[0],fmt='%b-%d-%Y').date() < cutoff_dt):
-			continue
-		expand_1_txn(driver,order)
+# -- rm --		if(str_to_dt(txn_data[0],fmt='%b-%d-%Y').date() < cutoff_dt):
+# -- rm --			continue
+		# --
+		# -- convoluted code ??
+		# -- takes time to expand a row, do it only when incl_details==True
+		# --
+		if(incl_details):
+			if(str_to_dt(txn_data[0],fmt='%b-%d-%Y').date() < cutoff_dt):
+				continue
+			expand_1_txn(driver,order)
 		# --
 		# --
 		# --
