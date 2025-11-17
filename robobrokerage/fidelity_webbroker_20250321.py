@@ -44,23 +44,15 @@ class fidelity_webbroker:
 			self.init_broker_session()
 
 	def init_broker_session(self):
-		try:
-			self.driver = self.reconnect_session()
-		except:
-			self.rootdir,self.driver = self.create_browser(self.rootdir)
-			self.present_broker_login_page()
-	
+		self.rootdir,self.driver = self.create_browser(self.rootdir)
+		self.present_broker_login_page()
+
 	def create_browser(self,rootdir=None):
 		if(rootdir is None):
 			rootdir=tempfile.TemporaryDirectory()
 		driver = browser_mgr.create_new_browser(rootdir=rootdir,persist_name=self.persist_name)
 		driver.current_url #// test is the remote still reachable
 		return (rootdir,driver)
-
-	def reconnect_session(self):
-		driver = browser_mgr.reconnect_browser(persist_name=self.persist_name)
-		driver.current_url #// test is the remote still reachable
-		return driver
 
 	#//
 	#//
