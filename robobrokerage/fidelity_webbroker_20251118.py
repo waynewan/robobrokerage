@@ -1,0 +1,302 @@
+import pandas as pd
+import numpy as np
+import argparse
+import datetime
+import getpass
+import hashlib
+import pickle
+import os
+import sys
+import tempfile
+import time
+import locale
+locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
+
+from jackutil import browser_mgr
+from . import trade_common
+# from .fidelity import fid_menu_accounts
+from .fidelity import fid_menu_accounts_20231207 as fid_menu_accounts
+from .fidelity import fid_menu_site
+from .fidelity import fid_page_activity_20250321 as m_activity
+from .fidelity import fid_page_auth
+from .fidelity import fid_page_auth_20230916
+from .fidelity import fid_page_landing
+# from .fidelity import fid_page_order_20240919 as pg_order
+from .fidelity import fid_page_order_20241015 as pg_order
+from .fidelity import fid_page_position_v1
+from .fidelity import fid_page_position_v3 as fid_page_position_def
+from .fidelity import fid_page_summary_20241115 as fid_page_summary
+
+# --
+# --
+# --
+class fidelity_webbroker:
+	def __init__(self,*,login,secret,dbgport,browser,browserPath,driverPath,tmpdir=os.path.expanduser('~/trash')):
+		self.driver = None
+		self.proc = None
+		# --
+		if(browser is None):
+			raise ValueError("browser cannot be None")
+		if(browser not in ['chrome','edge']):
+			raise ValueError("browser can only be 'chrome' and 'edge'")
+		if(browserPath is None):
+			raise ValueError("browserPath cannot be None")
+		if(driverPath is None):
+			raise ValueError("driverPath cannot be None")
+		if(dbgport is None):
+			raise ValueError("dbgport cannot be None")
+		# --
+		self.browser = browser
+		self.browserPath = browserPath
+		self.driverPath = driverPath
+		self.dbgport = dbgport
+		# --
+		print("browser:", self.browser)
+		print("browserPath:", self.browserPath)
+		print("driverPath:", self.driverPath)
+		print("dbgport:", self.dbgport)
+		# --
+		self.persist_name = {
+			'broker':'fidelity_webbroker_20251118',
+			'login':login,
+			'secret':secret
+		}
+		subdir = browser_mgr.temporary_dir_name(self.persist_name)
+		self.rootdir = f'{tmpdir}/{subdir}'
+		self.init_broker_session()
+
+	def init_broker_session(self):
+		self.create_browser()
+
+	def create_browser(self):
+		self.proc = browser_mgr.start_browser_for_debug(
+			port=self.dbgport, 
+			user_data_dir=self.rootdir, 
+			browser_type=self.browser,
+			browserPath=self.browserPath
+		)
+
+	def connect_driver(self):
+		if(self.driver is None or not self.is_connected_driver()):
+			self.driver = browser_mgr.connect_to_browser(
+				port=self.dbgport, 
+				browser_type=self.browser,
+				driverPath=self.driverPath
+			)
+		print("****** driver connected ******")
+
+	def is_connected_driver(self):
+		if(self.driver is None):
+			return False
+		return browser_mgr.is_driver_connected(self.driver)
+
+	def disconnect_driver(self):
+		self.driver.quit()
+		self.driver = None
+		print("****** driver disconnected ******")
+
+	#//
+	#//
+	#//
+	def wait_page_auth(self,timeout=10):
+		for nn in range(0,timeout):
+			try:
+				print("fid_page_auth.wait_page_loaded")
+				page_loaded = fid_page_auth.wait_page_loaded(self.driver,timeout=1)
+				return fid_page_auth
+			except:
+				pass
+			try:
+				print("fid_page_auth_20230916.wait_page_loaded")
+				page_loaded = fid_page_auth_20230916.wait_page_loaded(self.driver,timeout=1)
+				return fid_page_auth_20230916
+			except:
+				pass
+		raise Exception("Timeout waiting for auth page load")
+
+	def populate_login_info(self):
+		auth = fid_page_auth_20230916
+		auth.fill_password_inp(self.driver,"*************")
+		auth.fill_username_inp(self.driver,self.persist_name['login'])
+
+	def present_broker_login_page(self):
+#		fid_page_landing.goto_page(self.driver)
+#		# -- DEBUG -- print("**** DISABLED LOGIN *****")
+#		# -- DEBUG -- print(self.persist_name['login'])
+#		fid_page_landing.wait_page_loaded(self.driver,timeout=10)
+#		# --
+#		fid_page_landing.click_login_btn(self.driver)
+		fid_page_auth_20230916.goto_page(self.driver)
+		auth = self.wait_page_auth()
+		# --
+		auth.fill_password_inp(self.driver,"*************")
+		auth.fill_username_inp(self.driver,self.persist_name['login'])
+
+	def broker_logout(self):
+		fid_menu_site.click_menu_label(self.driver,"LOGOUT")
+
+	def wait_for_login_complete(self,waitsec=86400):
+		# --
+		# -- force post login landing page to summary
+		# --
+		for ii in range(0, waitsec):
+			try:
+				fid_page_position_v1.wait_page_loaded(self.driver,timeout=1)
+				fid_page_summary.goto_page(self.driver)
+			except:
+				pass
+			try:
+				fid_page_summary.wait_page_loaded(self.driver,timeout=1)
+				break
+			except:
+				pass
+
+	# --
+	# --
+	# --
+	def show_order_manage_page(self,subacct=None):
+		m_activity.goto_page(self.driver)
+		m_activity.wait_page_loaded(self.driver)
+		m_activity.select_orders_only(self.driver)
+		m_activity.wait_page_loaded(self.driver)
+		# --
+		fid_menu_accounts.select_account(self.driver,subacct)
+		fid_menu_accounts.wait_page_loaded(self.driver)
+
+	# --
+	# --
+	# --
+	def get_history(self,*,subacct=None,days_opt='10',include_raw=False,include_details=True):
+		m_activity.goto_page(self.driver)
+		m_activity.wait_page_loaded(self.driver)
+		m_activity.select_history_only(self.driver)
+		# --
+		# !! possible race condition on page and panel loading !!
+		# !! wait for menu is available before changing it     !!
+		# --
+		m_activity.wait_page_loaded(self.driver)
+		fid_menu_accounts.wait_page_loaded(self.driver)
+		# --
+		# -- assume no more stale elements, and proceed to choose 
+		# -- the target account
+		# --
+		fid_menu_accounts.select_account(self.driver,subacct)
+		fid_menu_accounts.wait_page_loaded(self.driver)
+		# --
+		# !! must be done last; otherwise, get reset by other changes
+		# --
+		m_activity.select_date_filter(self.driver,days_opt=days_opt)
+		m_activity.wait_page_loaded(self.driver)
+		# --
+		# -- rm -- m_activity.view_all_txns(self.driver)
+		# -- rm -- m_activity.wait_page_loaded(self.driver)
+		# --
+		raw_transactions = m_activity.raw_transactions(self.driver,incl_details=include_details)
+		formatted_transactions = m_activity.formatted_transactions(raw_transactions)
+		if(include_raw):
+			return (raw_transactions,formatted_transactions)
+		else:
+			return formatted_transactions
+
+	# --
+	# --
+	# --
+	def get_positions(self,*,subacct=None,include_raw=False,parse_col=True,activate_hack=False):
+		if(activate_hack):
+			# --
+			# -- ## HACK ## make window bigger to display all columns
+			# !! zoom doesn't work, for technical reason !!
+			# --
+			self.driver.set_window_size(2400,2560)
+			self.driver.set_window_position(0,0)
+		# --
+		fid_page_position_def.goto_page(self.driver)
+		fid_page_position_def.wait_page_loaded(self.driver)
+		# --
+		fid_menu_accounts.select_account(self.driver,subacct)
+		fid_page_position_def.wait_page_loaded(self.driver)
+		# --
+		fid_page_position_def.select_overview_tab(self.driver)
+		fid_page_position_def.wait_page_loaded(self.driver)
+		time.sleep(2)
+		if(activate_hack):
+			# --
+			# -- ## HACK ## return to normal
+			# --
+			self.driver.set_window_size(1440,2560)
+			self.driver.set_window_position(0,0)
+			self.driver.maximize_window()
+		# --
+		header = fid_page_position_def.raw_header(self.driver)
+		raw_data = fid_page_position_def.raw_data(self.driver,header=header)
+		# --
+		data_formatter = fid_page_position_def
+		if(not fid_page_position_def.verify_header_version(header)):
+			data_formatter = fid_page_position_v1
+		# --
+		expanded = data_formatter.expand_position_table(raw_data)
+		if(not parse_col):
+			if(include_raw):
+				return (raw_data,expanded,None)
+			else:
+				return expanded
+		else:
+			# !!
+			# !! fid_page_position_def has no format_position_table function
+			# !! verify if fid_page_position_def still in use
+			# !!
+			formatted = data_formatter.format_position_table(expanded)
+			if(include_raw):
+				return (raw_data,expanded,formatted)
+			else:
+				# !!
+				# !! this is default behavior
+				# !!
+				return formatted
+
+	# --
+	# --
+	# --
+	def new_order_by_qty(self,*,account,action,symbol,quantity,price=None,capital_limit=None,auto_send=True):
+		if(quantity<=0):
+			raise Exception(f"bad quantity:{quantity}")
+		# --
+		pg_order.goto_page_with_symbol(self.driver,symbol)
+		pg_order.raise_if_symbol_not_found(self.driver)
+		account_selected = pg_order.select_account(self.driver,account)
+		order_action = pg_order.select_action(self.driver,action)
+		pg_order.set_quantity(self.driver,quantity)
+		triggered_limit_price_rule = None
+		current_market = pg_order.get_current_market(self.driver)
+		if(price is None or np.isnan(price)):
+			triggered_limit_price_rule,limit_price = trade_common.compute_limit_price(action=action,qty=quantity,**current_market)
+			pg_order.set_limit_price(self.driver,limit_price)
+		else:
+			pg_order.set_limit_price(self.driver,price)
+			triggered_limit_price_rule = "Provided"
+		pg_order.set_day_order(self.driver)
+		pg_order.set_condition_none(self.driver)
+		if(not auto_send):
+			return None
+		# --
+		pg_order.preview_order(self.driver)
+		ele = pg_order.wait_for_preview_accepted_or_error(self.driver)
+		if(type(ele)!=type({}) and ele.text.startswith("Error")):
+			raise Exception(ele.text)
+		preview = pg_order.get_preview(self.driver)
+		preview["Price Rule"] = triggered_limit_price_rule
+		preview["Current Market"] = current_market
+		# --
+		if(capital_limit is None):
+			preview['Order Preview'] = 'Bypassed'
+		else:
+			preview['Order Preview'] = 'OK'
+			if(preview['Cost']>capital_limit):
+				raise Exception('Failed capital limit test during preview')
+		# --
+		pg_order.send_order(self.driver)
+		pg_order.wait_page_new_order_btn(self.driver)
+		sent_order_result = pg_order.get_sent_order(self.driver)
+		preview['Order#'] = sent_order_result['Order#']
+		return preview
+
