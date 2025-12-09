@@ -248,7 +248,11 @@ def format_col_to_numeric(colval,rm_fn=format_val_remove_char(re.compile('[$,%]'
 		return colval
 	if('--' in colval):
 		return np.nan
-	return float( rm_fn(colval) )
+	try:
+		return float( rm_fn(colval) )
+	except:
+		print("##### ERR/NOT_FLOAT" , colval)
+		return np.nan
 
 def format_position_table(data):
 	data = data.copy()
