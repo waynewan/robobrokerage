@@ -60,7 +60,7 @@ PAGE_STATUS_OK = "__PAGE_STATUS_OK__"
 def goto_page(driver):
 	goto_url(driver,URL_PAGE,force=True)
 
-def wait_page_loaded(driver,timeout=10):
+def wait_page_loaded(driver,timeout=300):
 	wait_for_clickable_xpath(driver,XP_DATE_SELECTOR_DD,timeout=timeout)
 
 def page_status(driver):
