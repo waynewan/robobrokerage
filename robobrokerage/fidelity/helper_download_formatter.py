@@ -5,7 +5,6 @@ import sys
 import os 
 import pandas
 import numpy
-from jackutil.microfunc import read_dirty_csv
 
 # !!
 # !! this is a bad idea, possible solution, 
@@ -62,4 +61,34 @@ def fidelity_dl_pos_formatter(df0):
 	df1.columns = 'Symbol,Desc,Last Price,Current Value,% of Account,Quantity,Total Cost,Per Share'.split(',')
 	df1['Per Share'] = df1['Total Cost'] / df1['Quantity']
 	return df1
+
+# --
+# -- transaction file from fidelity contains header and footer
+# --
+def read_dirty_csv(filepath, header_row=1, date_col=[], num_col=[], key_col=[]):
+	try:
+		df = pandas.read_csv(
+			filepath,
+			engine='python',
+			skip_blank_lines=True,
+			header=header_row,
+		)
+		df.columns = df.columns.str.strip()
+		for nnull in key_col:
+			df = df[ ~ df[nnull].isna() ]
+		for dcol in date_col:
+			df[dcol] = pandas.to_datetime(df[dcol], errors='coerce')
+		for ncol in num_col:
+			try:
+				df[ncol] = df[ncol].str.replace(r'[$%,]','',regex=True).astype(float)
+			except Exception as e:
+				print(ncol,e)
+		return df
+	except FileNotFoundError:
+		print(f"Error: File not found at {filepath}")
+		return pandas.DataFrame()
+	except Exception as e:
+		print(e)
+		print(f"An error occurred during file reading: {e}")
+		return pandas.DataFrame()
 
