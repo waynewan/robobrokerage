@@ -14,14 +14,12 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
 
 from jackutil import browser_mgr
 from . import trade_common
-# from .fidelity import fid_menu_accounts
 from .fidelity import fid_menu_accounts_20231207 as fid_menu_accounts
 from .fidelity import fid_menu_site
 from .fidelity import fid_page_activity_20250321 as m_activity
 from .fidelity import fid_page_auth
 from .fidelity import fid_page_auth_20230916
 from .fidelity import fid_page_landing
-# from .fidelity import fid_page_order_20240919 as pg_order
 from .fidelity import fid_page_order_20241015 as pg_order
 from .fidelity import fid_page_position_v1
 from .fidelity import fid_page_position_v3 as fid_page_position_def
