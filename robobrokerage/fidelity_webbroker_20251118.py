@@ -17,7 +17,6 @@ from . import trade_common
 from .fidelity import fid_menu_accounts_20231207 as fid_menu_accounts
 from .fidelity import fid_menu_site
 from .fidelity import fid_page_activity_20250321 as m_activity
-from .fidelity import fid_page_auth
 from .fidelity import fid_page_auth_20230916
 from .fidelity import fid_page_landing
 from .fidelity import fid_page_order_20241015 as pg_order
@@ -98,12 +97,6 @@ class fidelity_webbroker:
 	#//
 	def wait_page_auth(self,timeout=10):
 		for nn in range(0,timeout):
-			try:
-				print("fid_page_auth.wait_page_loaded")
-				page_loaded = fid_page_auth.wait_page_loaded(self.driver,timeout=1)
-				return fid_page_auth
-			except:
-				pass
 			try:
 				print("fid_page_auth_20230916.wait_page_loaded")
 				page_loaded = fid_page_auth_20230916.wait_page_loaded(self.driver,timeout=1)
