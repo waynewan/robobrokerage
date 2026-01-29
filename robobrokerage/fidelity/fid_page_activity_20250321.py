@@ -234,6 +234,8 @@ def view_all_txns(driver):
 			raise ValueError(err_msg)
 	_,errors = retry(ftr,retry=10,exceptTypes=(ValueError,StaleElementReferenceException),rtnEx=True,silent=True)
 	err = errors[-1]
+	if(err is None):
+		return
 	if(type(err)==type(ValueError()) and str(err)==err_msg):
 		return
 	else:
