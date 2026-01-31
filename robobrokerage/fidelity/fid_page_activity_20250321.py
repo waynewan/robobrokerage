@@ -90,6 +90,11 @@ def select_date_filter_custom(driver,fromdate,todate):
 # -- fromdate,todate: mm/dd/yyyy
 # --
 def select_date_filter(driver,days_opt):
+	def ftr():
+		return __impl_select_date_filter(driver,days_opts)
+	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=False)
+
+def __impl_select_date_filter(driver,days_opt):
 	fromdate,todate = ( None,None )
 	if(days_opt.startswith("Custom")):
 		days_opt,fromdate,todate = days_opt.split(",")
@@ -140,6 +145,7 @@ def __ut_switch_option_to(ele,new_state):
 		return None
 	pressed = pressed_state.upper()=="TRUE"
 	want_on = new_state.upper()=="ON"
+	# -- DEBUG -- print(pressed,want_on)
 	if(want_on != pressed):
 		ele.click()
 		return True
@@ -204,27 +210,36 @@ def txn_symbol(desc):
 # --
 # -- actions
 # --
-def select_history_only(driver):
+def select_button_only(driver,button="xxx"):
 	eles = driver.find_elements(By.XPATH,XP_FILTER_OPTIONS)
 	for ele in eles:
 		ele_txt = ut_is_stale(ele)
 		if(ele_txt is None):
 			continue
-		if(ele_txt.find("History")>=0):
+		if(ele_txt.find(button)>=0):
 			new_state = ut_switch_option_to(ele, "on")
+			# -- DEBUG -- print(f"'{ele_txt}'",new_state)
 		else:
 			new_state = ut_switch_option_to(ele, "off")
+			# -- DEBUG -- print(f"'{ele_txt}'",new_state)
+
+def select_history_only(driver):
+	def ftr():
+		# !!
+		# !! temp solution, occassionally, the click doesn't stick
+		# !!
+		select_button_only(driver,button="History")
+		return select_button_only(driver,button="History")
+	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=True)
 
 def select_orders_only(driver):
-	eles = driver.find_elements(By.XPATH,XP_FILTER_OPTIONS)
-	for ele in eles:
-		ele_txt = ut_is_stale(ele)
-		if(ele_txt is None):
-			continue
-		if(ele_txt.find("Orders")>=0):
-			new_state = ut_switch_option_to(ele, "on")
-		else:
-			new_state = ut_switch_option_to(ele, "off")
+	def ftr():
+		# !!
+		# !! temp solution, occassionally, the click doesn't stick
+		# !!
+		select_button_only(driver,button="Orders")
+		return select_button_only(driver,button="Orders")
+	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=True)
 
 def view_all_txns(driver):
 	err_msg = "No 'Load more results' button"
