@@ -91,7 +91,7 @@ def select_date_filter_custom(driver,fromdate,todate):
 # --
 def select_date_filter(driver,days_opt):
 	def ftr():
-		return __impl_select_date_filter(driver,days_opts)
+		return __impl_select_date_filter(driver,days_opt)
 	return retry(ftr,retry=10,exceptTypes=(StaleElementReferenceException),rtnEx=False,silent=False)
 
 def __impl_select_date_filter(driver,days_opt):
