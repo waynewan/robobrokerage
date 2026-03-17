@@ -11,6 +11,10 @@ PAGE_STATUS_UNKNOWN = "__PAGE_STATUS_UNKNOWN__"
 PAGE_STATUS_OK = "__PAGE_STATUS_OK__"
 
 
+def match(driver):
+	return len(driver.find_elements(By.XPATH, XP_MENU_ACCOUNTS)) > 0
+
+
 def goto_page(driver):
 	goto_url(driver, URL_PAGE, force=True)
 

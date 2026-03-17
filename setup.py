@@ -1,6 +1,6 @@
 from setuptools import setup
 setup(
-	author='#',
+	author='claude',
 	author_email='#',
 	description='interacting with popular online brokers',
 	license='Apache 2.0',
@@ -14,6 +14,6 @@ setup(
 		'robobrokerage.fidelity',
 	],
 	url='#',
-	version='0.1.1.17.dev55',
+	version='0.1.3.4+clu',
 	zip_safe=False
 )

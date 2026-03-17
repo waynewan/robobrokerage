@@ -6,80 +6,81 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 
-def find_element_by_xpath_if_exist(driver,xpath):
+
+def find_element_by_xpath_if_exist(driver, xpath):
 	try:
-		# return driver.find_element_by_xpath(xpath)
-		return driver.find_element(By.XPATH,xpath)
+		return driver.find_element(By.XPATH, xpath)
 	except NoSuchElementException:
 		return None
 
-def find_elements_by_xpath_if_exist(driver,xpath):
+
+def find_elements_by_xpath_if_exist(driver, xpath):
 	try:
-		# return driver.find_elements_by_xpath(xpath)
 		return driver.find_elements(By.XPATH, xpath)
 	except NoSuchElementException:
 		return None
 
-def select_option(select_ele,select_text):
-	# for option in select_ele.find_elements_by_tag_name('option'):
+
+def select_option(select_ele, select_text):
 	for option in select_ele.find_elements(By.TAG_NAME, 'option'):
-		if(option.text==select_text):
+		if option.text == select_text:
 			option.click()
 			return option
 	return None
 
-def select_option_relax(select_ele,select_text):
-	# for option in select_ele.find_elements_by_tag_name('option'):
+
+def select_option_relax(select_ele, select_text):
 	for option in select_ele.find_elements(By.TAG_NAME, 'option'):
 		opt_text = option.text
-		if(select_text.upper() in opt_text.upper()):
+		if select_text.upper() in opt_text.upper():
 			option.click()
-			return option,opt_text
+			return option, opt_text
 	return None
 
-def goto_url(driver,url,force=False,params=None):
-	if(params is not None and len(params)!=0):
+
+def goto_url(driver, url, force=False, params=None):
+	if params is not None and len(params) != 0:
 		url = url.format(*params)
-	if( not force and driver.current_url==url ):
+	if not force and driver.current_url == url:
 		return
 	driver.get(url)
-	
-def click_partial_match(driver,xpath,name):
-	# elements = driver.find_elements_by_xpath(xpath)
+
+
+def click_partial_match(driver, xpath, name):
 	elements = driver.find_elements(By.XPATH, xpath)
 	name = name.upper()
 	for ele in elements:
-		if(name in ele.text.upper()):
-			actual_text = ele.text
+		if name in ele.text.upper():
 			ele.click()
 			return ele
 	return None
 
-def click(driver,xpath,name):
-	# elements = driver.find_elements_by_xpath(xpath)
+
+def click(driver, xpath, name):
 	elements = driver.find_elements(By.XPATH, xpath)
 	name = name.upper()
 	for ele in elements:
-		ele_text = ele.text
-		# print("click ... ",ele_text)
-		if(ele_text.upper()==name):
-			actual_text = ele_text
+		if ele.text.upper() == name:
 			ele.click()
 			return ele
 	return None
 
-def wait_for_xpath(driver,xpath,also_visible=True,timeout=10):
-	if(also_visible):
-		condition = EC.visibility_of_element_located((By.XPATH,xpath))
-		ele_at_xp = WebDriverWait(driver, timeout).until(condition)
-		return ele_at_xp
+
+def wait_for_xpath(driver, xpath, also_visible=True, timeout=10):
+	if also_visible:
+		condition = EC.visibility_of_element_located((By.XPATH, xpath))
 	else:
-		condition = EC.presence_of_element_located((By.XPATH,xpath))
-		ele_at_xp = WebDriverWait(driver, timeout).until(condition)
-		return ele_at_xp
+		condition = EC.presence_of_element_located((By.XPATH, xpath))
+	return WebDriverWait(driver, timeout).until(condition)
 
-def wait_for_clickable_xpath(driver,xpath,timeout=10):
-	condition = EC.element_to_be_clickable((By.XPATH,xpath))
-	ele_at_xp = WebDriverWait(driver, timeout).until(condition)
-	return ele_at_xp
 
+def wait_for_clickable_xpath(driver, xpath, timeout=10):
+	condition = EC.element_to_be_clickable((By.XPATH, xpath))
+	return WebDriverWait(driver, timeout).until(condition)
+
+
+def resolve(driver, *candidates):
+	for mod in candidates:
+		if mod.match(driver):
+			return mod
+	raise RuntimeError("No matching module found for current page")
