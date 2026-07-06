@@ -14,6 +14,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
 URL_PAGE = "https://digital.fidelity.com/ftgw/digital/trade-equity/index/orderEntry"
 URL_PAGE_PARAM = 'https://brokerage.fidelity.com/ftgw/brkg/equityticket/index?SECURITY_ID={}&WSATTR=cssnapshot'
 XP_REFRESH_BTN = '//pvd-ett-button[@id="eq-ticket__quote-refresh-icon-a"]'
+XP_ACC_CASH_LBL = "//div[@class='funds-title'][text()='Cash available to trade']"
 XP_PREVIEW_BTN = "//div/order-entry-base//*[@id='previewOrderBtn']"
 XP_PLACE_ORDER_BTN = '//*[@id="placeOrderBtn"]'
 XP_NEW_ORDER_BTN = '//*[@id="Enter_order_button"]'
@@ -30,7 +31,7 @@ PAGE_STATUS_SENT = "__PAGE_STATUS_SENT__"
 
 
 def match(driver):
-	return ( len(driver.find_elements(By.XPATH, XP_PREVIEW_BTN)) > 0 or len(driver.find_elements(By.XPATH, XP_REFRESH_BTN)) > 0 )
+	return ( len(driver.find_elements(By.XPATH, XP_PREVIEW_BTN)) > 0 or len(driver.find_elements(By.XPATH, XP_ACC_CASH_LBL)) > 0 )
 
 
 def goto_page(driver):
@@ -52,7 +53,7 @@ def raise_if_symbol_not_found(driver, timeout=1):
 
 
 def wait_page_loaded(driver, timeout=10):
-	wait_for_xpath(driver, XP_REFRESH_BTN, timeout=timeout)
+	return wait_for_xpath(driver, XP_ACC_CASH_LBL, timeout=timeout)
 
 
 def wait_page_preview_btn(driver, timeout=10):
