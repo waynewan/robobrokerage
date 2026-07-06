@@ -27,8 +27,13 @@ def goto_and_resolve(driver, *candidates):
 # -- single point of change when Fidelity rolls a new UI version:
 # -- add the new module to the front of the relevant list
 # --
+# !! **NEW** page class should be on top, it less likely to be obsolele !!
+# --
 _candidates = {
-	'activity': [fid_page_activity,fid_page_activity_20260702],
+	'activity': [
+		fid_page_activity_20260702,
+		fid_page_activity,
+	],
 	'position': [fid_page_position],
 	'order':    [fid_page_order],
 	'summary':  [fid_page_summary],
