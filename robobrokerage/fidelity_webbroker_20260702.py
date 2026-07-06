@@ -167,7 +167,7 @@ class fidelity_webbroker:
 		fid_menu_accounts.wait_page_loaded(self.driver)
 
 	# --
-	def get_history(self, *, subacct, days_opt='10', include_raw=False, include_details=True, getlimit=9999):
+	def get_history(self, *, subacct, days_opt='10', include_raw=False, include_details=True, cutoff_dt_width=-5, getlimit=9999):
 		m_act = self.goto_activity()
 		m_act.select_history_only(self.driver)
 		# --
@@ -183,7 +183,7 @@ class fidelity_webbroker:
 		# --
 		m_act.select_date_filter(self.driver, days_opt=days_opt)
 		m_act.wait_page_loaded(self.driver)
-		raw_transactions = m_act.raw_transactions(self.driver, incl_details=include_details,getlimit=getlimit)
+		raw_transactions = m_act.raw_transactions(self.driver, incl_details=include_details,cutoff_dt_width=cutoff_dt_width,getlimit=getlimit)
 		formatted = m_act.formatted_transactions(raw_transactions)
 		if include_raw:
 			return (raw_transactions, formatted)

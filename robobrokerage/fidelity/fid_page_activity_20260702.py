@@ -225,6 +225,19 @@ def view_all_txns(driver):
 		return
 	raise err
 
+def expand_all_transactions(driver, cutoff_dt=None, getlimit=9999):
+	eles = driver.find_elements(By.XPATH,XP_ACTIVITY_ROW)
+	if(getlimit is not None and getlimit > 0):
+		eles = eles[0:getlimit]
+	print(f"cutoff_dt={cutoff_dt}")
+	print(f"max row={len(eles)}")
+	for ele in eles:
+		txt = ele.text.replace('\n'," | ")
+		dt_str = txt.split(' | ')[0]
+		row_dt = str_to_dt(dt_str, '%b-%d-%Y').date()
+		if(row_dt >= cutoff_dt):
+			expand_1_txn(driver,ele,count=5)
+
 
 def expand_1_txn(driver, ele, count=5):
 	for ii in range(0, count):
@@ -237,24 +250,28 @@ def expand_1_txn(driver, ele, count=5):
 			pass
 
 
-def collapse_1_txn(driver, ele, count=5):
-	for ii in range(0, count):
-		try:
-			subele = ele.find_elements(By.XPATH, XP_ACT_EXEC_EXPANDED)
-			if len(subele) > 0:
-				ele.click()
-				force_render(driver)
-		except:
-			pass
+def force_render(driver):
+	pass
+	#driver.save_screenshot('C:/temp/force_render.png')
 
-def collapse_all_reset(driver):
-	screen_row = driver.find_elements(By.XPATH, XP_ACTIVITY_ROW)
-	for order in screen_row:
-		collapse_1_txn(driver,order)
-		
+def p__process_basic(cells):
+	order1 = {}
+	order1['Date'] = cells[0]
+	order1['Description'] = cells[1]
+	order1['Symbol'] = None
+	if order1['Description'] is not None:
+		order1['Type'] = txn_category(order1['Description'])
+		order1['Symbol'] = txn_symbol(order1['Description'])
+	order1['Amount'] = cells[2]
+	order1['Balance'] = cells[3]
+	order1['Details'] = ""
+	order1['Price'] = ""
+	order1['Shares'] = ""
+	order1['Settlement Date'] = ""
+	return order1
 
-def process_order(order_text):
-	lines = order_text.split("|")
+def p__process_detail(order_text):
+	lines = order_text.split("\n")
 	if len(lines) <= 2:
 		return None
 	keys = lines[0::2]
@@ -266,24 +283,28 @@ def process_order(order_text):
 		data[key] = val
 	return data if "Date" in data else None
 
-def force_render(driver):
-	pass
-	#driver.save_screenshot('C:/temp/force_render.png')
+def p__merge_orders_details(orders,details):
+	# --
+	# -- indexing
+	# --
+	details_map = {}
+	for detail in details:
+		key = detail['Date'] + detail['Symbol'] + detail['Amount']
+		if(key is None):
+			print(f"# WARNING # : building map, None key : {detail['Date']},{detail['Symbol']},{detail['Amount']}")
+		else:
+			details_map[key] = detail
+	# --
+	for order in orders:
+		key = order['Date'] + order['Symbol'] + order['Amount']
+		detail = details_map.get(key)
+		if(detail is None):
+			print(f"# WARNING # : cannot find detail[{key}]")
+		else:
+			order.update(detail)
+	return orders
 
-def find_detail_panel(driver,order,order1):
-	collapse_all_reset(driver)
-	expand_1_txn(driver,order)
-	details = driver.find_elements(By.XPATH, XP_ACTIVITY_DETAIL_ROW)
-	if(len(details)==1):
-		details = details[0].text.replace('\n','|')
-		collapse_1_txn(driver,order)
-		return details
-	else:
-		collapse_1_txn(driver,order)
-		print("# WARN BAD_DATA # len(details) : ", len(details), order1)
-		return None
-
-def raw_transactions(driver, incl_details=True, cutoff_dt=None, cutoff_dt_width=-2,getlimit=9999):
+def raw_transactions(driver, incl_details=True, cutoff_dt=None, cutoff_dt_width=-2, getlimit=9999):
 	# --
 	# -- cutoff_dt defaults to today() at call time, not at import time
 	# --
@@ -291,49 +312,46 @@ def raw_transactions(driver, incl_details=True, cutoff_dt=None, cutoff_dt_width=
 		cutoff_dt = today()
 	cutoff_dt = days_away(cutoff_dt, cutoff_dt_width)
 	def ftr():
-		return __impl_raw_transactions(driver, incl_details=incl_details, cutoff_dt=cutoff_dt,getlimit=getlimit)
+		return __impl_raw_transactions(driver, incl_details=incl_details, cutoff_dt=cutoff_dt, getlimit=getlimit)
 	return retry(ftr, retry=10, exceptTypes=(StaleElementReferenceException,), rtnEx=False, silent=True)
 
-
-def __impl_raw_transactions(driver, incl_details=True, cutoff_dt=None,getlimit=9999):
+def __impl_raw_transactions(driver, incl_details=True, cutoff_dt=None, getlimit=9999):
 	# --
 	# -- expand the list if "Load more results" is available
 	# --
 	view_all_txns(driver)
-
+	# --
+	# -- get txn basic
+	# --
 	screen_row = driver.find_elements(By.XPATH, XP_ACTIVITY_ROW)
 	orders = []
-	for order in tqdm(screen_row[0:getlimit], leave=None, desc="txns"):
+	for order in tqdm(screen_row[0:getlimit], leave=None, desc="txns basic"):
 		cells = order.text.split('\n')
 		if(len(cells)<=3):
 			continue
-		order1 = {}
-		order1['Date'] = cells[0]
-		order1['Description'] = cells[1]
-		order1['Symbol'] = None
-		if order1['Description'] is not None:
-			order1['Type'] = txn_category(order1['Description'])
-			order1['Symbol'] = txn_symbol(order1['Description'])
-		order1['Amount'] = cells[2]
-		order1['Balance'] = cells[3]
-		order1['Details'] = ""
-		order1['Price'] = ""
-		order1['Shares'] = ""
-		order1['Settlement Date'] = ""
-		if incl_details:
-			details = find_detail_panel(driver,order,order1)
-			if(details is None):
-				continue
-			details_data = process_order(details)
-			print(details_data)
-			order1.update(details_data)
+		order1 = p__process_basic(cells)
 		orders.append(order1)
 
+	# --
+	# -- get txn details, then merge
+	# -- because the basic, detail blocks are not structurally related
+	# --
+	details = []
+	if(incl_details):
+		expand_all_transactions(driver,cutoff_dt=cutoff_dt, getlimit=getlimit)
+		screen_row = driver.find_elements(By.XPATH, XP_ACTIVITY_DETAIL_ROW)
+		for order in tqdm(screen_row, leave=None, desc="txns detail"):
+			detail1 = p__process_detail(order.text)
+			if(detail1 is not None):
+				details.append(detail1)
+		orders = p__merge_orders_details(orders,details)
+	# --
+	# -- prepare dataframe for return
+	# --
 	df0 = pd.DataFrame(orders)
 	df0 = df0.replace("", None)
 	non_empty_row = ~df0.isnull().all(axis=1)
 	return df0[non_empty_row].sort_values(by=["Date", "Symbol"], ascending=[True, True]).reset_index(drop=True)
-
 
 def formatted_transactions(raw_txns):
 	formatted = raw_txns.copy()
