@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 
 
 def find_element_by_xpath_if_exist(driver, xpath):
@@ -79,8 +80,16 @@ def wait_for_clickable_xpath(driver, xpath, timeout=10):
 	return WebDriverWait(driver, timeout).until(condition)
 
 
-def resolve(driver, *candidates):
-	for mod in candidates:
-		if mod.match(driver):
-			return mod
+def resolve(driver, *candidates, check_count=15):
+	for ii in range(0, check_count):
+		for mod in candidates:
+			try:
+				rtn = mod.wait_page_loaded(driver,timeout=1)
+				if(rtn is not None):
+					print(f"## DEBUG ## : {mod.__name__} selected")
+					return mod
+			except TimeoutException as ex:
+				# -- expecting timeout
+				pass
 	raise RuntimeError("No matching module found for current page")
+

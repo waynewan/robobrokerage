@@ -27,8 +27,10 @@ def goto_page(driver):
 
 
 def wait_page_loaded(driver, timeout=300):
-	wait_for_clickable_xpath(driver, XP_OVERVIEW_TAB, timeout=timeout)
-	wait_for_xpath(driver, XP_POSITION_TABLE_DATA, timeout=timeout)
+	rtn = wait_for_clickable_xpath(driver, XP_OVERVIEW_TAB, timeout=timeout)
+	if(rtn is not None):
+		return rtn
+	return wait_for_xpath(driver, XP_POSITION_TABLE_DATA, timeout=timeout)
 
 
 def page_status(driver):

@@ -14,17 +14,21 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
 
 # --
 URL_PAGE = "https://digital.fidelity.com/ftgw/digital/portfolio/activity"
-XP_DATE_SELECTOR_DD = "//timeperiod-filter//button"
-XP_DATE_SELECTOR_OPT = "//div[@id='timeperiod-select-container']//input/.."
-XP_DATE_SELECTOR_APPLY = "//div[@id='timeperiod-select-container']//*[normalize-space(text())='Apply']"
+XP_DATE_SELECTOR_DD = "//filter-by-time//button"
+XP_DATE_SELECTOR_OPT = '//filter-by-time/section//fds-radio-group//fds-radio'
+XP_DATE_SELECTOR_APPLY = "//filter-by-time/section//*[normalize-space(text())='Apply']"
 XP_LEGACY_PAGE_BTN = "//a[text()='legacy portfolio activity page']"
-XP_FILTER_OPTIONS = '//div[@class="activity-order-menu-area"]//activity-order-filter-button//button'
+XP_FILTER_OPTIONS = "//filter-by-type//fds-chip"
 XP_BTN = '//button'
-XP_ACTIVITY_ROW = '//activity-list//div[@role="row"][1]'
+XP_ACTIVITY_ROW = '//history-table/activity-table//div[@role="grid"]/div[@data-ref="eBody"]//div[@role="row"]'
+XP_ACTIVITY_DETAIL_ROW = '//history-table/activity-table//div[@role="grid"]/div[@data-ref="eBody"]//detail-cell'
 XP_INPUT_FROM_DATE = "//input[@label='From Date']"
 XP_INPUT__TO__DATE = "//input[@label='To Date']"
 PAGE_STATUS_UNKNOWN = "__PAGE_STATUS_UNKNOWN__"
 PAGE_STATUS_OK = "__PAGE_STATUS_OK__"
+XP_FILTER_OPT_CHECKED = "fds-checked"
+XP_ACT_EXEC_COLLAPSED = ".//fds-button[@fds-icon-left='collapsed']"
+XP_ACT_EXEC_EXPANDED = ".//fds-button[@fds-icon-left='expanded']"
 
 
 def match(driver):
@@ -107,7 +111,7 @@ def goto_legacy(driver):
 # -- utility
 # --
 def __ut_switch_option_to(ele, new_state):
-	pressed_state = ele.get_attribute("aria-pressed")
+	pressed_state = ele.get_attribute(XP_FILTER_OPT_CHECKED)
 	if pressed_state is None:
 		return None
 	pressed = pressed_state.upper() == "TRUE"
@@ -124,7 +128,7 @@ def ut_switch_option_to(ele, new_state):
 		if not pressed:
 			break
 		time.sleep(1.0)
-	return ele.get_attribute("aria-pressed")
+	return ele.get_attribute(XP_FILTER_OPT_CHECKED)
 
 
 def ut_is_stale(ele):
@@ -222,15 +226,62 @@ def view_all_txns(driver):
 	raise err
 
 
-def expand_1_txn(driver, ele):
-	XP_ACT_COLLAPSED = ".//div[@role='button'][@aria-expanded='false']"
-	try:
-		subele = ele.find_elements(By.XPATH, XP_ACT_COLLAPSED)
-		if len(subele) > 0:
-			ele.click()
-	except:
-		pass
+def expand_1_txn(driver, ele, count=5):
+	for ii in range(0, count):
+		try:
+			subele = ele.find_elements(By.XPATH, XP_ACT_EXEC_COLLAPSED)
+			if len(subele) > 0:
+				ele.click()
+				force_render(driver)
+		except:
+			pass
 
+
+def collapse_1_txn(driver, ele, count=5):
+	for ii in range(0, count):
+		try:
+			subele = ele.find_elements(By.XPATH, XP_ACT_EXEC_EXPANDED)
+			if len(subele) > 0:
+				ele.click()
+				force_render(driver)
+		except:
+			pass
+
+def collapse_all_reset(driver):
+	screen_row = driver.find_elements(By.XPATH, XP_ACTIVITY_ROW)
+	for order in screen_row:
+		collapse_1_txn(driver,order)
+		
+
+def process_order(order_text):
+	lines = order_text.split("|")
+	if len(lines) <= 2:
+		return None
+	keys = lines[0::2]
+	values = lines[1::2]
+	data = {}
+	for key, val in zip(keys, values):
+		if key == 'Symbol Desc.':
+			continue
+		data[key] = val
+	return data if "Date" in data else None
+
+def force_render(driver):
+	pass
+	#driver.save_screenshot('C:/temp/force_render.png')
+
+def find_detail_panel(driver,order,order1):
+	collapse_all_reset(driver)
+	expand_1_txn(driver,order)
+	details = driver.find_elements(By.XPATH, XP_ACTIVITY_DETAIL_ROW)
+	if(len(details)==1):
+		details = details[0].text.replace('\n','|')
+		collapse_1_txn(driver,order)
+		return details
+	else:
+		collapse_1_txn(driver,order)
+		print("# WARN BAD_DATA # len(details) : ", len(details), order1)
+		return None
 
 def raw_transactions(driver, incl_details=True, cutoff_dt=None, cutoff_dt_width=-2,getlimit=9999):
 	# --
@@ -250,60 +301,31 @@ def __impl_raw_transactions(driver, incl_details=True, cutoff_dt=None,getlimit=9
 	# --
 	view_all_txns(driver)
 
-	def process_order(order_text):
-		lines = order_text.split("\n")
-		if len(lines) <= 2:
-			return None
-		keys = lines[0::2]
-		values = lines[1::2]
-		data = {}
-		for key, val in zip(keys, values):
-			if key == 'Symbol Desc.':
-				continue
-			data[key] = val
-		return data if "Date" in data else None
-
-	def find_detail_panel(order):
-		details = order.find_elements(By.XPATH, "..//activity-order-detail-panel")
-		if len(details) == 1:
-			return details
-		details = order.find_elements(By.XPATH, "..//activity-order-detail-panel-ui")
-		if len(details) == 1:
-			return details
-		return []
-
 	screen_row = driver.find_elements(By.XPATH, XP_ACTIVITY_ROW)
 	orders = []
 	for order in tqdm(screen_row[0:getlimit], leave=None, desc="txns"):
-		txn_data = order.text.split('\n')
-		if len(txn_data) <= 1:
-			continue
-		if incl_details:
-			if str_to_dt(txn_data[0], fmt='%b-%d-%Y').date() < cutoff_dt:
-				continue
-			expand_1_txn(driver, order)
-		# --
-		cells = order.find_elements(By.XPATH, "./div[@role='cell' or @role='rowheader']")
-		if len(cells) <= 3:
+		cells = order.text.split('\n')
+		if(len(cells)<=3):
 			continue
 		order1 = {}
-		order1['Date'] = cells[1].text
-		order1['Description'] = cells[2].text
+		order1['Date'] = cells[0]
+		order1['Description'] = cells[1]
 		order1['Symbol'] = None
 		if order1['Description'] is not None:
 			order1['Type'] = txn_category(order1['Description'])
 			order1['Symbol'] = txn_symbol(order1['Description'])
-		order1['Amount'] = cells[3].text
-		order1['Balance'] = cells[4].text
+		order1['Amount'] = cells[2]
+		order1['Balance'] = cells[3]
 		order1['Details'] = ""
 		order1['Price'] = ""
 		order1['Shares'] = ""
 		order1['Settlement Date'] = ""
 		if incl_details:
-			details = find_detail_panel(order)
-			if len(details) != 1:
+			details = find_detail_panel(driver,order,order1)
+			if(details is None):
 				continue
-			details_data = process_order(details[0].text)
+			details_data = process_order(details)
+			print(details_data)
 			order1.update(details_data)
 		orders.append(order1)
 

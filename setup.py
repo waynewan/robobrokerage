@@ -14,6 +14,6 @@ setup(
 		'robobrokerage.fidelity',
 	],
 	url='#',
-	version='0.1.3.4+clu',
+	version='0.1.3.5+clu',
 	zip_safe=False
 )
