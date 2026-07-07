@@ -289,11 +289,12 @@ def p__merge_orders_details(orders,details):
 	# --
 	details_map = {}
 	for detail in details:
-		key = detail['Date'] + detail['Symbol'] + detail['Amount']
-		if(key is None):
-			print(f"# WARNING # : building map, None key : {detail['Date']},{detail['Symbol']},{detail['Amount']}")
-		else:
+		try:
+			key = detail['Date'] + detail['Symbol'] + detail['Amount']
 			details_map[key] = detail
+		except Exception as ex:
+			print(f"# WARNING # : building map,detail : {detail}")
+			print(type(ex).__name__, ex)
 	# --
 	for order in orders:
 		key = order['Date'] + order['Symbol'] + order['Amount']
