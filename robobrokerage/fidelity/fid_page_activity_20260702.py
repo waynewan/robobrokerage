@@ -342,7 +342,13 @@ def __impl_raw_transactions(driver, incl_details=True, cutoff_dt=None, getlimit=
 		expand_all_transactions(driver,cutoff_dt=cutoff_dt, getlimit=getlimit)
 		screen_row = driver.find_elements(By.XPATH, XP_ACTIVITY_DETAIL_ROW)
 		for order in tqdm(screen_row, leave=None, desc="txns detail"):
-			detail1 = p__process_detail(order.text)
+			# --
+			# !! order.text is rendered text, and not incl all text in DOM
+			# !! use get_property("innerText") instead
+			# !! textContent will remove newline char
+			# --
+			order_text = order.get_property("innerText")
+			detail1 = p__process_detail(order_text)
 			if(detail1 is not None):
 				details.append(detail1)
 		orders = p__merge_orders_details(orders,details)
