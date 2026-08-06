@@ -16,7 +16,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
 URL_PAGE = "https://digital.fidelity.com/ftgw/digital/portfolio/activity"
 XP_DATE_SELECTOR_DD = "//filter-by-time//button"
 XP_DATE_SELECTOR_OPT = '//filter-by-time/section//fds-radio-group//fds-radio'
-XP_DATE_SELECTOR_APPLY = "//filter-by-time/section//*[normalize-space(text())='Apply']"
+XP_DATE_SELECTOR_APPLY = "//filter-by-time/section//*[normalize-space(text())='Apply']/../.."
 XP_LEGACY_PAGE_BTN = "//a[text()='legacy portfolio activity page']"
 XP_FILTER_OPTIONS = "//filter-by-type//fds-chip"
 XP_BTN = '//button'
