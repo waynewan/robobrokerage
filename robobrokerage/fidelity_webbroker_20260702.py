@@ -11,9 +11,11 @@ from .fidelity import fid_menu_accounts
 from .fidelity import fid_menu_site
 from .fidelity import fid_page_activity
 from .fidelity import fid_page_activity_20260702
+from .fidelity import fid_page_activity_20260916
 from .fidelity import fid_page_auth
 from .fidelity import fid_page_landing
 from .fidelity import fid_page_order
+from .fidelity import fid_page_order_20260916
 from .fidelity import fid_page_position
 from .fidelity import fid_page_summary
 from .fidelity.crawler_util import resolve
@@ -31,11 +33,15 @@ def goto_and_resolve(driver, *candidates):
 # --
 _candidates = {
 	'activity': [
+		fid_page_activity_20260916,
 		fid_page_activity_20260702,
 		fid_page_activity,
 	],
+	'order': [
+		fid_page_order_20260916,
+		fid_page_order
+	],
 	'position': [fid_page_position],
-	'order':    [fid_page_order],
 	'summary':  [fid_page_summary],
 }
 
